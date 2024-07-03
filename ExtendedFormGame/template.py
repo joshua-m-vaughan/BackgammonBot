@@ -62,5 +62,24 @@ class GameRule:
 
     def getCurrentAgentIndex(self):
         return self.current_agent_index
+    
+class Agent():
+    def __init__(self, id):
+        self.id = id
+ 
+    def select_action(self, game_state, actions):
+        """select_action
+        Given a set of available actions for the agent to execute, and
+        a copy of the current game state (including that of the agent),
+        select one of the actions to execute.
+
+        Args:
+            game_state (GameState): Instance of GameState.
+            actions ([Action]): List of Action instances.
+
+        Returns:
+            Action: Selected action instance.
+        """
+        return random.choice(actions)
 
 # END ---------------------------------------------------------------- #
