@@ -22,46 +22,121 @@ class GameState():
 class Action():
     pass
 
-class GameRule:
+class GameRules:
     def __init__(self, num_agents = 2):
-        self.current_agent_index = 0
+        """__init__
+        Initialise an instance of GameRules class.
+
+        Args:
+            num_agents (int, optional): Number of agents in the game.
+            Defaults to 2.
+        """
+        self.current_agent_id = 0
         self.num_agents = num_agents
         self.current_game_state = self.initial_game_state()
         self.action_counter = 0
 
     def initial_game_state(self):
+        """initial_game_state
+        Returns the intial game state for the games rules.
+
+        Returns:
+            GameState: An instance of GameState class.
+        """
         utils.raiseNotDefined()
         return 0
 
     def generate_successor(self, game_state, action, agent_id):
+        """generate_successor
+        Returns the successive GameState s' for applying Action a on 
+        Agent agent_id in GameState s.
+
+        Args:
+            game_state (GameState): GameState s.
+            action (Action): Action a.
+            agent_id (int): Agent ID.
+
+        Returns:
+            GameState: GameState s'.
+        """
         utils.raiseNotDefined()
         return 0
 
-    def get_next_agent_index(self):
-        return (self.current_agent_index + 1) % self.num_of_agent
+    def get_next_agent_id(self):
+        """get_next_agent_id
+        Returns the Agent ID of the agent whose turn is next.
+
+        Returns:
+            int: Agent ID
+        """
+        return (self.current_agent_id + 1) % self.num_agents
 
     def get_legal_actions(self, game_state, agent_id):
+        """get_legal_actions
+        Returns a list of Action instances that are legal for Agent ID
+        in a given GameState.
+
+        Args:
+            game_state (GameState): GameState s.
+            agent_id (int): Agent ID.
+
+        Returns:
+            [Action]: List of Action instances that are valid in
+            GameState s.
+        """
         utils.raiseNotDefined()
         return []
 
-    def calculate_score(self, game_state,agent_id):
+    def calculate_score(self, game_state, agent_id):
+        """calculate_score
+        Returns the score for agent ID in GameState s.
+
+        Args:
+            game_state (GameState): GameState s.
+            agent_id (int): Agent ID.
+
+        Returns:
+            int: Integer representing the agent's score.
+        """
         utils.raiseNotDefined()
         return 0
 
-    def game_ends(self):
+    def game_ends(self, GameState):
+        """game_ends
+        Returns whether the game ends in GameState.
+
+        Args:
+            game_state (GameState): GameState s.
+        
+        Returns:
+            bool: _description_
+        """
         utils.raiseNotDefined()
         return False
 
     def update(self, action):
+        """update
+        In-place update of GameState s to GameState s', by applying
+        Action a.
+
+        Args:
+            action (Action): Action a.
+        """
+
         temp_state = self.current_game_state
         self.current_game_state = self.generate_successor(temp_state,
                                                           action,
-                                                          self.current_agent_index)
-        self.current_agent_index = self.get_next_agent_index()
+                                                          self.current_agent_id)
+        self.current_agent_id = self.get_next_agent_id()
         self.action_counter += 1
 
-    def getCurrentAgentIndex(self):
-        return self.current_agent_index
+    def get_current_agent_id(self):
+        """get_current_agent_id
+
+        Returns:
+            int: Current agent ID.
+        """
+        return self.current_agent_id
     
 class Agent():
     def __init__(self, id):
