@@ -18,7 +18,7 @@ WARMUP = 10 # Warm-up period for each agent on their first turn.
 
 class Game():
 
-    def __init__(self, GameRules, agent_list, agent_names,
+    def __init__(self, GameRules, agent_list, agent_names, num_agents,
                  seed = 1, time_limit = 1, warning_limit=3):
         """__init__
         Initialise an instance of Game class.
@@ -28,7 +28,7 @@ class Game():
             the rules of the game.
             agent_list ([Agent]): List of Agent instances.
             agent_names ([str]): List of strings for each agent's name.
-            agent_num (int): Number of agents in the game.
+            num_agents (int): Number of agents in the game.
             seed (int, optional): Random seed. Defaults to 1.
             time_limit (int, optional): Turn time limit. Defaults to 1.
             warning_limit (int, optional): Number of warnings for
@@ -45,12 +45,13 @@ class Game():
             assert(player.id == i)
             i += 1
 
-        self.game_rule = GameRules(len(agent_list))
+        self.game_rule = GameRules(num_agents)
         self.agents = agent_list
         self.agents_names = agent_names
+        self.num_agents = num_agents
         self.time_limit = time_limit
         self.warning_limit = warning_limit
-        self.warnings = [0]*len(agent_list)
+        self.warnings = [0]*num_agents
         self.warning_positions = []
 
     def run(self):
