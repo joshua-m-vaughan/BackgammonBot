@@ -19,4 +19,7 @@ class GameState():
     def __init__(self, num_agents, agent_id):
         pass
 
+class Action():
+    pass
+
 # END ---------------------------------------------------------------- #
