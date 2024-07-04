@@ -47,16 +47,36 @@ class BackgammonState(GameState):
         self.num_agents = num_agents
         self.current_agent_id = agent_id
 
+        SETUP = [(1,2), (12,5), (17,3), (19,5)]
+
         # Initialise the board state attributes.
         self.points_content = [0] * 26
         self.black_checkers = []
         self.white_checkers = []
+        for point, num_checkers in SETUP:
+            # Black Setup
+            self.points_content[point] = num_checkers
+            self.black_checkers.append(point)
+            # White Setup
+            self.points_content[BLACK_HOME_POINT - point] = -num_checkers
+            self.white_checkers.append(BLACK_HOME_POINT - point)
         self.black_checkers_taken = 0
         self.white_checkers_taken = 0
 
         # Initialise the dice attributes.
         self.dice = [0, 0]
     
+    def __str__(self) -> str:
+        output = ""
+        for i in range(len(self.points_content)):
+            if self.points_content[i] > 0:
+                output += (str(i) +" "+("B"*self.points_content[i]) + "\n")
+            elif self.points_content[i] < 0:
+                output += (str(i) +" "+("W"*-self.points_content[i]) + "\n")
+            else:
+                output += (str(i) + "\n")
+        return output
+
     def roll(self) -> None:
         """roll
         Roll the dice to generate a new set of two dice representation.
@@ -74,7 +94,7 @@ class BackgammonRules(GameRules):
         """__init__
         Initialise an instance of GameRules class.
         """
-        super.__init__(NUM_BACKGAMMON_AGENTS)
+        super().__init__(NUM_BACKGAMMON_AGENTS)
 
     def initial_game_state(self) -> GameState:
         """initial_game_state
@@ -112,5 +132,10 @@ class BackgammonRules(GameRules):
 class BackgammonAction(Action):
     pass
 
+if __name__ == "__main__":
+    bs = BackgammonState()
+    print(str(bs))
+    bgr = BackgammonRules()
+    print("BLACK PIP SCORE: "+str(bgr.calculate_score(bs, BLACK_ID)))
 
 # END ---------------------------------------------------------------- #
