@@ -129,6 +129,35 @@ class BackgammonRules(GameRules):
 
         return pip_score
 
+    def game_ends(self, game_state:BackgammonState) -> bool:
+        """game_ends
+        Returns whether the game ends in BackgammonState.
+
+        Args:
+            game_state (BackgammonState): BackgammonState s.
+        
+        Returns:
+            bool: Boolean indicating the completion of the game.
+        """
+        if game_state.current_agent_id == BLACK_ID:
+            if (len(game_state.black_checkers) == 1 and
+                game_state.black_checkers[0] == BLACK_HOME_POINT and
+                game_state.black_checkers_taken == 0):
+                # Black has moved all pieces to its home position.
+                return True
+            else:
+                return False
+        elif game_state.current_agent_id == WHITE_ID:
+            if (len(game_state.white_checkers) == 1 and
+                game_state.white_checkers[0] == WHITE_HOME_POINT and
+                game_state.white_checkers_taken == 0):
+                # White has moved all pieces to its home position.
+                return True
+            else:
+                return False
+        else:
+            raise ValueError("Invalid Agent ID passed to game_ends.")
+
 class BackgammonAction(Action):
     pass
 

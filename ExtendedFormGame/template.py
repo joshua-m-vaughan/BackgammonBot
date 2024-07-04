@@ -104,7 +104,7 @@ class GameRules:
         utils.raiseNotDefined()
         return 0
 
-    def game_ends(self, GameState:GameState) -> bool:
+    def game_ends(self, game_state:GameState) -> bool:
         """game_ends
         Returns whether the game ends in GameState.
 
