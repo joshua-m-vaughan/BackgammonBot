@@ -9,9 +9,13 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 
 # CONSTANTS ---------------------------------------------------------- #
+
+MIN_DICE_VALUE = 1
+MAX_DICE_VALUE = 6
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -35,6 +39,16 @@ class BackgammonState(GameState):
 
         # Initialise the dice attributes.
         self.dice = [0, 0]
+    
+    def roll(self):
+        """roll
+        Roll the dice to generate a new set of two dice representation.
+        """
+
+        for i in len(self.dice):
+            self.dice = random.randrange(MIN_DICE_VALUE, MAX_DICE_VALUE)
+        
+        return None
 
 
 class BackgammonRules(GameRules):
