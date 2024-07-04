@@ -9,6 +9,7 @@
 # IMPORTS ------------------------------------------------------------ #
 
 import random
+from template import Agent, GameRules
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -18,8 +19,10 @@ WARMUP = 10 # Warm-up period for each agent on their first turn.
 
 class Game():
 
-    def __init__(self, GameRules, agent_list, agent_names, num_agents,
-                 seed = 1, time_limit = 1, warning_limit=3):
+    def __init__(self, GameRules:GameRules, agent_list:Agent,
+                 agent_names:list[str], num_agents:int,
+                 seed:int = 1, time_limit:int = 1,
+                 warning_limit:int = 3) -> None:
         """__init__
         Initialise an instance of Game class.
 
@@ -54,14 +57,15 @@ class Game():
         self.warnings = [0]*num_agents
         self.warning_positions = []
 
-    def run(self):
+    def run(self) -> None:
         """run
         This method runs a game until the termination state of the game
         is achieved.    
         """
         return None
 
-    def _end_game(self, history, is_time_out = False, time_out_id = None):
+    def _end_game(self, history:dict, is_time_out:bool = False,
+                  time_out_id:int = None) -> None:
         """_end_game
         Private method completes the end game writing of the game state
         at the termination state of the game.
