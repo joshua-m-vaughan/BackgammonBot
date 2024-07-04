@@ -96,22 +96,22 @@ class BackgammonRules(GameRules):
         """
         super().__init__(NUM_BACKGAMMON_AGENTS)
 
-    def initial_game_state(self) -> GameState:
+    def initial_game_state(self) -> BackgammonState:
         """initial_game_state
         Returns the intial game state for the games rules.
 
         Returns:
-            GameState: An instance of GameState class.
+            BackgammonState: An instance of BackgammonState class.
         """
         return BackgammonState(self.num_agents)
     
-    def calculate_score(self, game_state:GameState,
+    def calculate_score(self, game_state:BackgammonState,
                         agent_id:int) -> int:
         """calculate_score
-        Returns the pip score for agent ID in GameState s.
+        Returns the pip score for agent ID in BackgammonState s.
 
         Args:
-            game_state (GameState): GameState s.
+            game_state (BackgammonState): BackgammonState s.
             agent_id (int): Agent ID.
 
         Returns:
