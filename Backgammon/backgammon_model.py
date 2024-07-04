@@ -16,12 +16,26 @@ from ExtendedFormGame.template import GameState, GameRules, Action
 
 MIN_DICE_VALUE = 1
 MAX_DICE_VALUE = 6
+NUM_BACKGAMMON_AGENTS = 2
+STARTING_AGENT_ID = 0
 
 # CLASS DEF ---------------------------------------------------------- #
 
 class BackgammonState(GameState):
     
-    def __init__(self, num_agents, agent_id):
+    def __init__(self,
+                 num_agents=NUM_BACKGAMMON_AGENTS,
+                 agent_id = STARTING_AGENT_ID):
+        """__init__
+        Initialise an instance of BackgammonState class.
+
+        Args:
+            num_agents (int, optional): Number of agents in the game.
+            Defaults to 2.
+            STARTING_AGENT_ID (int, optional): Starting Agent ID.
+            Defaults to 0.
+
+        """
         # Assert expected input from Game builder.
         assert (num_agents == 2)
         assert (agent_id == 0)
