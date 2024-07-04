@@ -9,6 +9,9 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+from collections import defaultdict
+from copy import deepcopy
+import itertools
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 
@@ -21,6 +24,9 @@ BLACK_ID:int = 0
 WHITE_ID:int = 1
 BLACK_HOME_POINT:int = 25
 WHITE_HOME_POINT:int = 0
+INIT_BOARD_CONFIG = [(1,2), (12,5), (17,3), (19,5)]
+DOUBLES_MULTIPLIER:int = 4
+CHECKERS_BLOCKED:int = 2
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -47,24 +53,23 @@ class BackgammonState(GameState):
         self.num_agents = num_agents
         self.current_agent_id = agent_id
 
-        SETUP = [(1,2), (12,5), (17,3), (19,5)]
-
         # Initialise the board state attributes.
         self.points_content = [0] * 26
         self.black_checkers = []
         self.white_checkers = []
-        for point, num_checkers in SETUP:
+        for point, num_checkers in INIT_BOARD_CONFIG:
             # Black Setup
             self.points_content[point] = num_checkers
             self.black_checkers.append(point)
             # White Setup
             self.points_content[BLACK_HOME_POINT - point] = -num_checkers
-            self.white_checkers.append(BLACK_HOME_POINT - point)
+            self.white_checkers = [BLACK_HOME_POINT - point] + self.white_checkers
         self.black_checkers_taken = 0
         self.white_checkers_taken = 0
 
         # Initialise the dice attributes.
-        self.dice = [0, 0]
+        self.dice = [random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE),
+                     random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE)]
     
     def __str__(self) -> str:
         output = ""
@@ -75,6 +80,7 @@ class BackgammonState(GameState):
                 output += (str(i) +" "+("W"*-self.points_content[i]) + "\n")
             else:
                 output += (str(i) + "\n")
+        output += str("DICE: "+str(self.dice[0])+" "+str(self.dice[1]))
         return output
 
     def roll(self) -> None:
@@ -82,8 +88,8 @@ class BackgammonState(GameState):
         Roll the dice to generate a new set of two dice representation.
         """
 
-        for i in len(self.dice):
-            self.dice = random.randrange(MIN_DICE_VALUE, MAX_DICE_VALUE)
+        self.dice = [random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE),
+                     random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE)]
         
         return None
 
@@ -104,7 +110,92 @@ class BackgammonRules(GameRules):
             BackgammonState: An instance of BackgammonState class.
         """
         return BackgammonState(self.num_agents)
-    
+
+    def get_legal_actions(self, game_state:BackgammonState,
+                          agent_id:int) -> list[Action]:
+        """get_legal_actions
+        Returns a list of Action instances that are legal for Agent ID
+        in a given GameState.
+
+        Args:
+            game_state (BackgammonState): BackgammonState s.
+            agent_id (int): Agent ID.
+
+        Returns:
+            list[Action]: List of Action instances that are valid in
+            BackgammonState s.
+        """
+        # Validate dice to determine available moves.
+        [dice_a, dice_b] = game_state.dice
+        if dice_a == dice_b:
+            steps = [dice_a] * DOUBLES_MULTIPLIER
+        else:
+            steps = game_state.dice
+
+        # Generate all possible valid moves with the form of:
+        #   [from_point, to_point].
+        # A move is valid if it:
+        #   - Moves to a position given by a rolled step.
+        #   - Is within the bounds of the board game.
+        #   - Doesn't land on a point with 2 or more opposing checkers.
+        moves = [defaultdict(lambda: set())] * len(steps)
+
+        if agent_id == BLACK_ID:
+            for i in range(len(steps)):
+                # Generate the moves for each of the free pieces on the
+                # board.
+                for point in game_state.black_checkers:
+                
+                    # NOTE: Could efficiency be picked up here for when
+                    # doubles are rolled.
+                    
+                    # Validate move for positioning.
+                    if ((point+steps[i]) <= BLACK_HOME_POINT and
+                        (game_state.points_content[point+steps[i]] >
+                          -CHECKERS_BLOCKED)):
+                        moves[i]["free"].add((point, point+steps[i]))
+                
+                # Generate the move from the taken position on the
+                # board.
+                if game_state.black_checkers_taken > 0:
+                    moves[i]["taken"].add((WHITE_HOME_POINT,
+                                           WHITE_HOME_POINT+steps[i]))
+
+
+                        
+        elif agent_id == WHITE_ID:
+            for i in range(len(steps)):
+                # Generate the moves for each of the free pieces on the
+                # board.
+                for point in game_state.white_checkers:
+                
+                    # NOTE: Could efficiency be picked up here for when
+                    # doubles are rolled.
+
+                    # Validate move for positioning.
+                    if ((point-steps[i]) >= WHITE_HOME_POINT and
+                        (game_state.points_content[point-steps[i]] <
+                          CHECKERS_BLOCKED)):
+                        
+                        moves[i].add((point, point-steps[i]))
+                
+                # Generate the move from the taken position on the
+                # board.
+                if game_state.white_checkers_taken > 0:
+                    moves[i]["taken"].add((BLACK_HOME_POINT,
+                                           BLACK_HOME_POINT-steps[i]))
+        # Generate move combinations.
+        if agent_id == BLACK_ID:
+            num_taken_moves = min(game_state.black_checkers_taken, len(moves))
+            num_free_moves = len(moves) - num_taken_moves
+
+            taken_combos = list(itertools.combinations())
+
+        elif agent_id == WHITE_ID:
+            pass
+        for combo in itertools.combinations(moves, len(steps)):
+            print(combo)
+
     def calculate_score(self, game_state:BackgammonState,
                         agent_id:int) -> int:
         """calculate_score
@@ -166,5 +257,6 @@ if __name__ == "__main__":
     print(str(bs))
     bgr = BackgammonRules()
     print("BLACK PIP SCORE: "+str(bgr.calculate_score(bs, BLACK_ID)))
+    bgr.get_legal_actions(bs, 0)
 
 # END ---------------------------------------------------------------- #
