@@ -14,21 +14,21 @@ from ExtendedFormGame.template import GameState, GameRules, Action
 
 # CONSTANTS ---------------------------------------------------------- #
 
-MIN_DICE_VALUE = 1
-MAX_DICE_VALUE = 6
-NUM_BACKGAMMON_AGENTS = 2
-BLACK_ID = 0
-WHITE_ID = 1
-BLACK_HOME_POINT = 25
-WHITE_HOME_POINT = 0
+MIN_DICE_VALUE:int = 1
+MAX_DICE_VALUE:int = 6
+NUM_BACKGAMMON_AGENTS:int = 2
+BLACK_ID:int = 0
+WHITE_ID:int = 1
+BLACK_HOME_POINT:int = 25
+WHITE_HOME_POINT:int = 0
 
 # CLASS DEF ---------------------------------------------------------- #
 
 class BackgammonState(GameState):
     
     def __init__(self,
-                 num_agents=NUM_BACKGAMMON_AGENTS,
-                 agent_id = BLACK_ID):
+                 num_agents:int =NUM_BACKGAMMON_AGENTS,
+                 agent_id:int =BLACK_ID) -> None:
         """__init__
         Initialise an instance of BackgammonState class.
 
@@ -57,7 +57,7 @@ class BackgammonState(GameState):
         # Initialise the dice attributes.
         self.dice = [0, 0]
     
-    def roll(self):
+    def roll(self) -> None:
         """roll
         Roll the dice to generate a new set of two dice representation.
         """
@@ -76,7 +76,7 @@ class BackgammonRules(GameRules):
         """
         super.__init__(NUM_BACKGAMMON_AGENTS)
 
-    def initial_game_state(self):
+    def initial_game_state(self) -> GameState:
         """initial_game_state
         Returns the intial game state for the games rules.
 
@@ -85,7 +85,8 @@ class BackgammonRules(GameRules):
         """
         return BackgammonState(self.num_agents)
     
-    def calculate_score(self, game_state, agent_id):
+    def calculate_score(self, game_state:GameState,
+                        agent_id:int) -> int:
         """calculate_score
         Returns the pip score for agent ID in GameState s.
 
