@@ -16,7 +16,26 @@ from ExtendedFormGame.template import GameState, GameRules, Action
 # CLASS DEF ---------------------------------------------------------- #
 
 class BackgammonState(GameState):
-    pass
+    
+    def __init__(self, num_agents, agent_id):
+        # Assert expected input from Game builder.
+        assert (num_agents == 2)
+        assert (agent_id == 0)
+
+        # Initialise GameState attributes.
+        self.num_agents = num_agents
+        self.current_agent_id = agent_id
+
+        # Initialise the board state attributes.
+        self.points_content = [0] * 25
+        self.black_checkers = [0]
+        self.white_checkers = [0]
+        self.black_checkers_taken = 0
+        self.white_checkers_taken = 0
+
+        # Initialise the dice attributes.
+        self.dice = [0, 0]
+
 
 class BackgammonRules(GameRules):
     pass
