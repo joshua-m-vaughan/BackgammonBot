@@ -326,7 +326,30 @@ class BackgammonRules(GameRules):
                 return BEAR_OFF
             else:
                 return NORMAL
+    
+    def generate_successor(self, game_state: GameState,
+                           action:list[tuple], agent_id:int) -> GameState:
+        """generate_successor
+        Returns the successive GameState s' for applying Action a on 
+        Agent agent_id in GameState s.
 
+        Args:
+            game_state (GameState): GameState s.
+            action (list[tuple]): List of move tuples.
+            agent_id (int): Agent ID.
+
+        Returns:
+            GameState: GameState s'.
+        """
+        
+        game_state_prime = deepcopy(game_state)
+
+        for move in action:
+            game_state_prime = self._update_game_state(game_state_prime,
+                                                       move)
+        return game_state_prime
+
+    
     def _update_game_state(self, game_state:BackgammonState,
                            move:tuple) -> BackgammonState:
         """_update_game_state
