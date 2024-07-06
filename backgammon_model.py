@@ -9,9 +9,6 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from collections import defaultdict
-from copy import deepcopy
-import itertools
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 
@@ -127,74 +124,59 @@ class BackgammonRules(GameRules):
         """
         # Validate dice to determine available moves.
         [dice_a, dice_b] = game_state.dice
+        faces = []
         if dice_a == dice_b:
-            steps = [dice_a] * DOUBLES_MULTIPLIER
+            faces = [dice_a] * DOUBLES_MULTIPLIER
         else:
-            steps = game_state.dice
+            faces = game_state.dice
 
-        # Generate all possible valid moves with the form of:
-        #   [from_point, to_point].
-        # A move is valid if it:
-        #   - Moves to a position given by a rolled step.
-        #   - Is within the bounds of the board game.
-        #   - Doesn't land on a point with 2 or more opposing checkers.
-        moves = [defaultdict(lambda: set())] * len(steps)
+        # Generate play sequences.
+        # node = Node()
+        # self._generate_play_tree(node, faces)
 
-        if agent_id == BLACK_ID:
-            for i in range(len(steps)):
-                # Generate the moves for each of the free pieces on the
-                # board.
-                for point in game_state.black_checkers:
-                
-                    # NOTE: Could efficiency be picked up here for when
-                    # doubles are rolled.
-                    
-                    # Validate move for positioning.
-                    if ((point+steps[i]) <= BLACK_HOME_POINT and
-                        (game_state.points_content[point+steps[i]] >
-                          -CHECKERS_BLOCKED)):
-                        moves[i]["free"].add((point, point+steps[i]))
-                
-                # Generate the move from the taken position on the
-                # board.
-                if game_state.black_checkers_taken > 0:
-                    moves[i]["taken"].add((WHITE_HOME_POINT,
-                                           WHITE_HOME_POINT+steps[i]))
+        # Extract play sequences using DFS
 
+        return None
+    
+    def _generate_play_tree(root, faces:list[int]):
+        """_generate_play_tree
 
-                        
-        elif agent_id == WHITE_ID:
-            for i in range(len(steps)):
-                # Generate the moves for each of the free pieces on the
-                # board.
-                for point in game_state.white_checkers:
-                
-                    # NOTE: Could efficiency be picked up here for when
-                    # doubles are rolled.
+        Args:
+            root (_type_): Node of a tree that stores the play sequences.
+            faces (list[int]): List of faces to be used in play sequence.
+        """
+        
+        # Initialise node value.
+        # children = []
 
-                    # Validate move for positioning.
-                    if ((point-steps[i]) >= WHITE_HOME_POINT and
-                        (game_state.points_content[point-steps[i]] <
-                          CHECKERS_BLOCKED)):
-                        
-                        moves[i].add((point, point-steps[i]))
-                
-                # Generate the move from the taken position on the
-                # board.
-                if game_state.white_checkers_taken > 0:
-                    moves[i]["taken"].add((BLACK_HOME_POINT,
-                                           BLACK_HOME_POINT-steps[i]))
-        # Generate move combinations.
-        if agent_id == BLACK_ID:
-            num_taken_moves = min(game_state.black_checkers_taken, len(moves))
-            num_free_moves = len(moves) - num_taken_moves
+        # Validate exit condition: no more faces to consider.
+        # if len(faces) == 0:
+            # return children
+        
+        # Validate board state
+        # if root.state has at least one piece taken.
 
-            taken_combos = list(itertools.combinations())
+            # if valid move:
+                # Generate next state.
+                # Create a new search state node storing next state, and action applied to get it there.
+                # Add new search state node to set of children.
+                # Recursive call on new search state node with unsused faces.
 
-        elif agent_id == WHITE_ID:
-            pass
-        for combo in itertools.combinations(moves, len(steps)):
-            print(combo)
+        # elif root.state is ready to bear off.
+
+            # if valid move:
+                # Generate next state.
+                # Create a new search state node storing next state, and action applied to get it there.
+                # Add to set of children.
+                # Recursive call on new search state node.
+
+        # else:
+            
+            # if valid move:
+                # Generate next state.
+                # Create a new search state node storing next state, and action applied to get it there.
+                # Add to set of children.
+                # Recursive call on new search state node.
 
     def calculate_score(self, game_state:BackgammonState,
                         agent_id:int) -> int:
