@@ -331,7 +331,7 @@ class BackgammonRules(GameRules):
                            move:tuple) -> BackgammonState:
         """_update_game_state
         Returns an updated game state s' after applying move m in game
-        state s.
+        state s in place.
 
         Assumptions: The provided move is a valid move in the current
         board state.
@@ -344,65 +344,61 @@ class BackgammonRules(GameRules):
             BackgammonState: BackgammonState, s'.
         """
 
-        # NOTE: Should checkers list be a set and not a list?
-
         (from_point, to_point, _) = move
 
-        game_state_prime = deepcopy(game_state)
-
-        if game_state_prime.current_agent_id == BLACK_ID:
+        if game_state.current_agent_id == BLACK_ID:
             # Pick up checker.
-            assert (game_state_prime.points_content[from_point] > 0)
-            game_state_prime.points_content[from_point] -= 1
-            if game_state_prime.points_content[from_point] == 0:
-                game_state_prime.black_checkers.remove(from_point)
+            assert (game_state.points_content[from_point] > 0)
+            game_state.points_content[from_point] -= 1
+            if game_state.points_content[from_point] == 0:
+                game_state.black_checkers.remove(from_point)
             
             # Put down checker.
-            assert (game_state_prime.points_content[to_point] > -CHECKERS_BLOCKED)
-            if game_state_prime.points_content[to_point] > 0:
+            assert (game_state.points_content[to_point] > -CHECKERS_BLOCKED)
+            if game_state.points_content[to_point] > 0:
                 # Existing point.
-                game_state_prime.points_content[to_point] += 1
-            elif game_state_prime.points_content[to_point] == 0:
+                game_state.points_content[to_point] += 1
+            elif game_state.points_content[to_point] == 0:
                 # New point acquired.
-                game_state_prime.points_content[to_point] = 1
-                game_state_prime.black_checkers.append(to_point)
-                game_state_prime.black_checkers.sort()
-            elif game_state_prime.points_content[to_point] < 0:
+                game_state.points_content[to_point] = 1
+                game_state.black_checkers.append(to_point)
+                game_state.black_checkers.sort()
+            elif game_state.points_content[to_point] < 0:
                 # Take piece.
-                game_state_prime.points_content[to_point] = 1
-                game_state_prime.black_checkers.append(to_point)
-                game_state_prime.black_checkers.sort()
-                game_state_prime.white_checkers.remove(to_point)
-                game_state_prime.white_checkers.sort(reverese=True)
+                game_state.points_content[to_point] = 1
+                game_state.black_checkers.append(to_point)
+                game_state.black_checkers.sort()
+                game_state.white_checkers.remove(to_point)
+                game_state.white_checkers.sort(reverese=True)
         
-        elif game_state_prime.current_agent_id == WHITE_ID:
+        elif game_state.current_agent_id == WHITE_ID:
             # Pick up checker.
-            assert (game_state_prime.points_content[from_point] < 0)
-            game_state_prime.points_content[from_point] += 1
-            if game_state_prime.points_content[from_point] == 0:
-                game_state_prime.white_checkers.remove(from_point)
+            assert (game_state.points_content[from_point] < 0)
+            game_state.points_content[from_point] += 1
+            if game_state.points_content[from_point] == 0:
+                game_state.white_checkers.remove(from_point)
             
             # Put down checker.
-            assert (game_state_prime.points_content[to_point] < CHECKERS_BLOCKED)
-            if game_state_prime.points_content[to_point] < 0:
+            assert (game_state.points_content[to_point] < CHECKERS_BLOCKED)
+            if game_state.points_content[to_point] < 0:
                 # Existing point.
-                game_state_prime.points_content[to_point] -= 1
+                game_state.points_content[to_point] -= 1
 
-            elif game_state_prime.points_content[to_point] == 0:
+            elif game_state.points_content[to_point] == 0:
                 # New point acquired.
-                game_state_prime.points_content[to_point] = -1
-                game_state_prime.white_checkers.append(to_point)
-                game_state_prime.white_checkers.sort(reverese=True) 
+                game_state.points_content[to_point] = -1
+                game_state.white_checkers.append(to_point)
+                game_state.white_checkers.sort(reverese=True) 
 
-            elif game_state_prime.points_content[to_point] > 0:
+            elif game_state.points_content[to_point] > 0:
                 # Take piece.
-                game_state_prime.points_content[to_point] = 1
-                game_state_prime.white_checkers.append(to_point)
-                game_state_prime.white_checkers.sort(reverese=True) 
-                game_state_prime.black_checkers.remove(to_point)
-                game_state_prime.black_checkers.sort()
+                game_state.points_content[to_point] = 1
+                game_state.white_checkers.append(to_point)
+                game_state.white_checkers.sort(reverese=True) 
+                game_state.black_checkers.remove(to_point)
+                game_state.black_checkers.sort()
         
-        return game_state_prime
+        return game_state
         
 
     def calculate_score(self, game_state:BackgammonState,
