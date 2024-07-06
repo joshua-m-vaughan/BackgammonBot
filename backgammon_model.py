@@ -135,6 +135,10 @@ class BackgammonRules(GameRules):
             faces = [dice_a] * DOUBLES_MULTIPLIER
         else:
             faces = game_state.dice
+        # Rules require that if only one move can be played, it is done
+        # with the largest rolled face. As such, each play sequence,
+        # will be generated with this property in mind.
+        faces.sort()
 
         # Generate play sequences.
         # node = Node()
@@ -197,7 +201,7 @@ class BackgammonRules(GameRules):
         assuming the following:
         - The board is in ON_BAR or NORMAL board states.
         - The fromPoint is held by the current ID.
-        - The move is a valid move for the current BackgammonState.
+        - The move is a valid face for the current BackgammonState.
 
         Args:
             game_state (BackgammonState): Gamestate s.
@@ -216,6 +220,61 @@ class BackgammonRules(GameRules):
             return True
         else:
             return False
+    
+    def _evaluate_valid_bear_off(self, game_state:BackgammonState,
+                                 move:tuple) -> bool:
+        """_evaluate_valid_bear_off
+        Returns a boolean indicating whether the move is valid for the
+        board state in the BEAR_OFF board state.
+
+        Valid move if the move is:
+        - an exact bear-off, or
+        - when a larger number is rolled, the furthest piece is
+        born-off,
+        - or is a valid move.
+
+        assuming the following:
+        - The board is in BEAR_OFF board state.
+        - The fromPoint is held by the current ID.
+        - The move is a valid face for the current BackgammonState.
+
+        Args:
+            game_state (BackgammonState): Gamestate s.
+            move (tuple): Two tuple detailing fromPoint and toPoint of
+            a move.
+
+        Returns:
+            bool: _description_
+        """
+        
+        # NOTE: NEED TO UPDATE THE MOVE TUPLE TO INCLUDE THE FACE, SO
+        # THAT I CAN EVALUATE THE LARGEST PIECE BEING MOVED POINT.
+
+        (fromPoint, toPoint) = move
+
+        if (game_state.current_agent_id == BLACK_ID):
+            # Determine bear-off distance from bear-off. Over shoot is
+            # given by a negative.
+            bear_off_dist = (BLACK_HOME_POINT - toPoint)
+            if (bear_off_dist == 0):
+                return True
+            elif (bear_off_dist < 0 and
+                  game_state.black_checkers[0] == fromPoint):
+                return True
+            else:
+                return self._evaluate_valid_move(game_state)
+
+        elif (game_state.current_agent_id == WHITE_ID):
+            # Determine bear-off distance from bear-off. Over shoot is
+            # given by a negative.
+            bear_off_dist = (-(WHITE_HOME_POINT - toPoint))
+            if (bear_off_dist == 0):
+                return True
+            elif (bear_off_dist < 0 and
+                  game_state.white_checkers[-1] == fromPoint):
+                return True
+            else:
+                return self._evaluate_valid_move(game_state)
 
     def _evaluate_board_state(self, game_state:BackgammonState) -> int:
         """_evaluate_board_state
