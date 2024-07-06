@@ -187,6 +187,36 @@ class BackgammonRules(GameRules):
                 # Add to set of children.
                 # Recursive call on new search state node.
 
+    def _evaluate_valid_move(self, game_state:BackgammonState,
+                             move:tuple) -> bool:
+        """_evaluate_valid_move
+        Returns a boolean indicating whether the move is valid for the
+        board state in ON_BAR or NORMAL board states.
+
+        Valid move if toPoint is not blocked by opposing checkers,
+        assuming the following:
+        - The board is in ON_BAR or NORMAL board states.
+        - The fromPoint is held by the current ID.
+        - The move is a valid move for the current BackgammonState.
+
+        Args:
+            game_state (BackgammonState): Gamestate s.
+            move (tuple): Two tuple detailing fromPoint and toPoint of
+            a move.
+
+        Returns:
+            bool: _description_
+        """
+        (_, toPoint) = move
+        if (game_state.current_agent_id == BLACK_ID and
+            game_state.points_content > -CHECKERS_BLOCKED):
+            return True
+        elif (game_state.current_agent_id == WHITE_ID and
+            game_state.points_content < CHECKERS_BLOCKED):
+            return True
+        else:
+            return False
+
     def _evaluate_board_state(self, game_state:BackgammonState) -> int:
         """_evaluate_board_state
         Returns an integer indicating what class of state the board is
