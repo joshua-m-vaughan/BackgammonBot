@@ -144,7 +144,7 @@ class BackgammonRules(GameRules):
 
         return None
     
-    def _generate_play_tree(root, faces:list[int]):
+    def _generate_play_tree(self, root, faces:list[int]):
         """_generate_play_tree
 
         Args:
@@ -153,14 +153,15 @@ class BackgammonRules(GameRules):
         """
         
         # Initialise node value.
-        # children = []
+        children = []
 
         # Validate exit condition: no more faces to consider.
-        # if len(faces) == 0:
-            # return children
+        if len(faces) == 0:
+            return children
         
         # Validate board state
-        # if root.state has at least one piece taken.
+        if self._evaluate_board_state(root.state) == ON_BAR:
+            pass
 
             # if valid move:
                 # Generate next state.
@@ -168,7 +169,8 @@ class BackgammonRules(GameRules):
                 # Add new search state node to set of children.
                 # Recursive call on new search state node with unsused faces.
 
-        # elif root.state is ready to bear off.
+        elif self._evaluate_board_state(root.state) == BEAR_OFF:
+            pass
 
             # if valid move:
                 # Generate next state.
@@ -176,7 +178,8 @@ class BackgammonRules(GameRules):
                 # Add to set of children.
                 # Recursive call on new search state node.
 
-        # else:
+        elif self._evaluate_board_state(root.state) == NORMAL:
+            pass
             
             # if valid move:
                 # Generate next state.
