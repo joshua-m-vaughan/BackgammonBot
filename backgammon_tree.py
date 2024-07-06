@@ -65,7 +65,8 @@ class PlayNode():
         Returns the move attribute of the PlayNode instance.
 
         Returns:
-            tuple: Two tuple detailing fromPoint and toPoint of a move.
+            tuple: Three tuple detailing fromPoint, toPoint, and face
+            value of a move.
         """
         return self._move
     

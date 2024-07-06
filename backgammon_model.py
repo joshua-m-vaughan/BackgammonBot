@@ -197,27 +197,35 @@ class BackgammonRules(GameRules):
         Returns a boolean indicating whether the move is valid for the
         board state in ON_BAR or NORMAL board states.
 
-        Valid move if toPoint is not blocked by opposing checkers,
+        Valid move if to_point is not blocked by opposing checkers,
         assuming the following:
         - The board is in ON_BAR or NORMAL board states.
-        - The fromPoint is held by the current ID.
+        - The from_point is held by the current ID.
         - The move is a valid face for the current BackgammonState.
 
         Args:
             game_state (BackgammonState): Gamestate s.
-            move (tuple): Two tuple detailing fromPoint and toPoint of
-            a move.
+            move (tuple): Three tuple detailing fromPoint, toPoint, and
+            face value of a move.
 
         Returns:
-            bool: _description_
+            bool: True if valid, False otherwise.
         """
-        (_, toPoint) = move
+        (from_point, to_point, face) = move
+        assert (abs(to_point - from_point) == face)
+
         if (game_state.current_agent_id == BLACK_ID and
-            game_state.points_content > -CHECKERS_BLOCKED):
+            game_state.points_content[to_point] > -CHECKERS_BLOCKED and
+            to_point != BLACK_HOME_POINT):
+            assert(from_point in set(game_state.black_checkers))
             return True
+        
         elif (game_state.current_agent_id == WHITE_ID and
-            game_state.points_content < CHECKERS_BLOCKED):
+            game_state.points_content[to_point] < CHECKERS_BLOCKED and
+            to_point != WHITE_HOME_POINT):
+            assert(from_point in set(game_state.white_checkers))
             return True
+        
         else:
             return False
     
@@ -235,44 +243,53 @@ class BackgammonRules(GameRules):
 
         assuming the following:
         - The board is in BEAR_OFF board state.
-        - The fromPoint is held by the current ID.
+        - The from_point is held by the current ID.
         - The move is a valid face for the current BackgammonState.
 
         Args:
             game_state (BackgammonState): Gamestate s.
-            move (tuple): Two tuple detailing fromPoint and toPoint of
-            a move.
+            move (tuple): Three tuple detailing fromPoint, toPoint, and
+            face value of a move.
 
         Returns:
-            bool: _description_
+            bool: True if valid, False otherwise.
         """
         
-        # NOTE: NEED TO UPDATE THE MOVE TUPLE TO INCLUDE THE FACE, SO
-        # THAT I CAN EVALUATE THE LARGEST PIECE BEING MOVED POINT.
-
-        (fromPoint, toPoint) = move
+        (from_point, to_point, face) = move
 
         if (game_state.current_agent_id == BLACK_ID):
-            # Determine bear-off distance from bear-off. Over shoot is
-            # given by a negative.
-            bear_off_dist = (BLACK_HOME_POINT - toPoint)
-            if (bear_off_dist == 0):
+            # Move piece to home point.
+            if (to_point == BLACK_HOME_POINT and 
+                abs(to_point - from_point) == face):
                 return True
-            elif (bear_off_dist < 0 and
-                  game_state.black_checkers[0] == fromPoint):
+            
+            # Move the furthest piece to home point with an overshoot.
+            elif (to_point == BLACK_HOME_POINT and
+                  abs(to_point - from_point) < face and
+                  game_state.black_checkers[0] == from_point):
                 return True
+            
+            # Determine if otherwise a valid normal state move. (e.g.
+            # with a face of two, move a checker from point 4 to
+            # point 2.)
             else:
                 return self._evaluate_valid_move(game_state)
 
         elif (game_state.current_agent_id == WHITE_ID):
-            # Determine bear-off distance from bear-off. Over shoot is
-            # given by a negative.
-            bear_off_dist = (-(WHITE_HOME_POINT - toPoint))
-            if (bear_off_dist == 0):
+            # Move piece to home point.
+            if (to_point == WHITE_HOME_POINT and 
+                abs(to_point - from_point) == face):
                 return True
-            elif (bear_off_dist < 0 and
-                  game_state.white_checkers[-1] == fromPoint):
+            
+            # Move the furthest piece to home point with an overshoot.
+            elif (to_point == WHITE_HOME_POINT and
+                  abs(to_point - from_point) < face and
+                  game_state.white_checkers[0] == from_point):
                 return True
+            
+            # Determine if otherwise a valid normal state move. (e.g.
+            # with a face of two, move a checker from point 4 to
+            # point 2.)
             else:
                 return self._evaluate_valid_move(game_state)
 
