@@ -14,8 +14,8 @@ from ExtendedFormGame.template import GameState, GameRules, Action
 
 # CONSTANTS ---------------------------------------------------------- #
 
-MIN_DICE_VALUE:int = 1
-MAX_DICE_VALUE:int = 6
+MIN_FACE_VALUE:int = 1
+MAX_FACE_VALUE:int = 6
 NUM_BACKGAMMON_AGENTS:int = 2
 BLACK_ID:int = 0
 WHITE_ID:int = 1
@@ -71,8 +71,8 @@ class BackgammonState(GameState):
         self.white_checkers_taken = 0
 
         # Initialise the dice attributes.
-        self.dice = [random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE),
-                     random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE)]
+        self.dice = [random.randint(MIN_FACE_VALUE, MAX_FACE_VALUE),
+                     random.randint(MIN_FACE_VALUE, MAX_FACE_VALUE)]
     
     def __str__(self) -> str:
         output = ""
@@ -91,8 +91,8 @@ class BackgammonState(GameState):
         Roll the dice to generate a new set of two dice representation.
         """
 
-        self.dice = [random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE),
-                     random.randint(MIN_DICE_VALUE, MAX_DICE_VALUE)]
+        self.dice = [random.randint(MIN_FACE_VALUE, MAX_FACE_VALUE),
+                     random.randint(MIN_FACE_VALUE, MAX_FACE_VALUE)]
         
         return None
 
