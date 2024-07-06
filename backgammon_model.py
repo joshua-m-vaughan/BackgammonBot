@@ -20,10 +20,16 @@ NUM_BACKGAMMON_AGENTS:int = 2
 BLACK_ID:int = 0
 WHITE_ID:int = 1
 BLACK_HOME_POINT:int = 25
+BLACK_HOME_BORDER:int = 19
 WHITE_HOME_POINT:int = 0
+WHITE_HOME_BORDER:int = 6
 INIT_BOARD_CONFIG = [(1,2), (12,5), (17,3), (19,5)]
 DOUBLES_MULTIPLIER:int = 4
 CHECKERS_BLOCKED:int = 2
+# Board States
+ON_BAR:int = -1
+NORMAL:int = 0
+BEAR_OFF:int = 1
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -177,6 +183,39 @@ class BackgammonRules(GameRules):
                 # Create a new search state node storing next state, and action applied to get it there.
                 # Add to set of children.
                 # Recursive call on new search state node.
+
+    def _evaluate_board_state(self, game_state:BackgammonState) -> int:
+        """_evaluate_board_state
+        Returns an integer indicating what class of state the board is
+        in.
+
+        Args:
+            game_state (BackgammonState): Game state s.
+
+        Returns:
+            int: Class of board state
+        """
+
+        if game_state.current_agent_id == BLACK_ID:
+            if game_state.black_checkers_taken >= 1:
+                # Taken black pieces on bar.
+                return ON_BAR
+            elif game_state.black_checkers[0] >= BLACK_HOME_BORDER:
+                # All black pieces in black home board.
+                assert (game_state.black_checkers_taken < 1)
+                return BEAR_OFF
+            else:
+                return NORMAL
+        else:
+            if game_state.white_checkers_taken >= 1:
+                # Taken white pieces on bar.
+                return ON_BAR
+            elif game_state.white_checkers[-2] <= WHITE_HOME_BORDER:
+                # All white pieces in white home board.
+                assert (game_state.white_checkers_taken < 1)
+                return BEAR_OFF
+            else:
+                return NORMAL
 
     def calculate_score(self, game_state:BackgammonState,
                         agent_id:int) -> int:
