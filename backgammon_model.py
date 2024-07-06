@@ -12,6 +12,7 @@
 from copy import deepcopy
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
+from backgammon_tree import PlayNode
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -149,48 +150,123 @@ class BackgammonRules(GameRules):
 
         return None
     
-    def _generate_play_tree(self, root, faces:list[int]):
+    def _generate_play_tree(self, root:PlayNode, faces:list[int]) -> None:
         """_generate_play_tree
 
         Args:
-            root (_type_): Node of a tree that stores the play sequences.
-            faces (list[int]): List of faces to be used in play sequence.
+            root (PlayNode): Node of a tree that stores the play
+            sequences.
+            faces (list[int]): List of faces to be used in play
+            sequence.
         """
         
         # Initialise node value.
-        children = []
+        assert(root.children is None)
+        root.children = []
 
         # Validate exit condition: no more faces to consider.
         if len(faces) == 0:
-            return children
+            return root
         
         # Validate board state
         if self._evaluate_board_state(root.state) == ON_BAR:
-            pass
-
-            # if valid move:
-                # Generate next state.
-                # Create a new search state node storing next state, and action applied to get it there.
+            
+            # Determine move.
+            if root.state.current_agent_id == BLACK_ID:
+                move = (WHITE_HOME_POINT,
+                        WHITE_HOME_POINT + faces[0],
+                        faces[0])
+            else:
+                move = (BLACK_HOME_POINT,
+                        BLACK_HOME_POINT - faces[0],
+                        faces[0])
+                
+            if self._evaluate_valid_move(root.state, move):
+                # Generate new state after applying move.
+                game_state_prime = self._update_game_state(deepcopy(root.state), move)
+                # Create a new search state node storing next state, and move applied to get it there.
+                node_prime = PlayNode(root, game_state_prime, move)
                 # Add new search state node to set of children.
+                root.children.append(node_prime)
                 # Recursive call on new search state node with unsused faces.
+                self._generate_play_tree(node_prime, faces[:-1])
 
         elif self._evaluate_board_state(root.state) == BEAR_OFF:
-            pass
+            
+            if root.state.current_agent_id == BLACK_ID:
+                
+                # Determine move.
+                for point in root.state.black_checkers:
+                    move = (point,
+                            point + faces[0],
+                            faces[0])
+                    
+                    if self._evaluate_valid_bear_off(root.state, move):
+                        # Generate new state after applying move.
+                        game_state_prime = self._update_game_state(deepcopy(root.state), move)
+                        # Create a new search state node storing next state, and move applied to get it there.
+                        node_prime = PlayNode(root, game_state_prime, move)
+                        # Add new search state node to set of children.
+                        root.children.append(node_prime)
+                        # Recursive call on new search state node with unsused faces.
+                        self._generate_play_tree(node_prime, faces[:-1])
+                    
+            else:
 
-            # if valid move:
-                # Generate next state.
-                # Create a new search state node storing next state, and action applied to get it there.
-                # Add to set of children.
-                # Recursive call on new search state node.
+                # Determine move.
+                for point in root.state.white_checkers:
+                    move = (point,
+                            point - faces[0],
+                            faces[0])
+                    
+                    if self._evaluate_valid_bear_off(root.state, move):
+                        # Generate new state after applying move.
+                        game_state_prime = self._update_game_state(deepcopy(root.state), move)
+                        # Create a new search state node storing next state, and move applied to get it there.
+                        node_prime = PlayNode(root, game_state_prime, move)
+                        # Add new search state node to set of children.
+                        root.children.append(node_prime)
+                        # Recursive call on new search state node with unsused faces.
+                        self._generate_play_tree(node_prime, faces[:-1])
 
         elif self._evaluate_board_state(root.state) == NORMAL:
             pass
             
-            # if valid move:
-                # Generate next state.
-                # Create a new search state node storing next state, and action applied to get it there.
-                # Add to set of children.
-                # Recursive call on new search state node.
+            if root.state.current_agent_id == BLACK_ID:
+                
+                # Determine move.
+                for point in root.state.black_checkers:
+                    move = (point,
+                            point + faces[0],
+                            faces[0])
+                    
+                    if self._evaluate_valid_move(root.state, move):
+                        # Generate new state after applying move.
+                        game_state_prime = self._update_game_state(deepcopy(root.state), move)
+                        # Create a new search state node storing next state, and move applied to get it there.
+                        node_prime = PlayNode(root, game_state_prime, move)
+                        # Add new search state node to set of children.
+                        root.children.append(node_prime)
+                        # Recursive call on new search state node with unsused faces.
+                        self._generate_play_tree(node_prime, faces[:-1])
+                    
+            else:
+
+                # Determine move.
+                for point in root.state.white_checkers:
+                    move = (point,
+                            point - faces[0],
+                            faces[0])
+                    
+                    if self._evaluate_valid_move(root.state, move):
+                        # Generate new state after applying move.
+                        game_state_prime = self._update_game_state(deepcopy(root.state), move)
+                        # Create a new search state node storing next state, and move applied to get it there.
+                        node_prime = PlayNode(root, game_state_prime, move)
+                        # Add new search state node to set of children.
+                        root.children.append(node_prime)
+                        # Recursive call on new search state node with unsused faces.
+                        self._generate_play_tree(node_prime, faces[:-1])
 
     def _evaluate_valid_move(self, game_state:BackgammonState,
                              move:tuple) -> bool:
