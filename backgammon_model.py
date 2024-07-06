@@ -9,6 +9,7 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+from copy import deepcopy
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 
@@ -325,6 +326,84 @@ class BackgammonRules(GameRules):
                 return BEAR_OFF
             else:
                 return NORMAL
+
+    def _update_game_state(self, game_state:BackgammonState,
+                           move:tuple) -> BackgammonState:
+        """_update_game_state
+        Returns an updated game state s' after applying move m in game
+        state s.
+
+        Assumptions: The provided move is a valid move in the current
+        board state.
+
+        Args:
+            game_state (BackgammonState): BackgammonState, s.
+            move (tuple): Three tuple of a valid move, m.
+
+        Returns:
+            BackgammonState: BackgammonState, s'.
+        """
+
+        # NOTE: Should checkers list be a set and not a list?
+
+        (from_point, to_point, _) = move
+
+        game_state_prime = deepcopy(game_state)
+
+        if game_state_prime.current_agent_id == BLACK_ID:
+            # Pick up checker.
+            assert (game_state_prime.points_content[from_point] > 0)
+            game_state_prime.points_content[from_point] -= 1
+            if game_state_prime.points_content[from_point] == 0:
+                game_state_prime.black_checkers.remove(from_point)
+            
+            # Put down checker.
+            assert (game_state_prime.points_content[to_point] > -CHECKERS_BLOCKED)
+            if game_state_prime.points_content[to_point] > 0:
+                # Existing point.
+                game_state_prime.points_content[to_point] += 1
+            elif game_state_prime.points_content[to_point] == 0:
+                # New point acquired.
+                game_state_prime.points_content[to_point] = 1
+                game_state_prime.black_checkers.append(to_point)
+                game_state_prime.black_checkers.sort()
+            elif game_state_prime.points_content[to_point] < 0:
+                # Take piece.
+                game_state_prime.points_content[to_point] = 1
+                game_state_prime.black_checkers.append(to_point)
+                game_state_prime.black_checkers.sort()
+                game_state_prime.white_checkers.remove(to_point)
+                game_state_prime.white_checkers.sort(reverese=True)
+        
+        elif game_state_prime.current_agent_id == WHITE_ID:
+            # Pick up checker.
+            assert (game_state_prime.points_content[from_point] < 0)
+            game_state_prime.points_content[from_point] += 1
+            if game_state_prime.points_content[from_point] == 0:
+                game_state_prime.white_checkers.remove(from_point)
+            
+            # Put down checker.
+            assert (game_state_prime.points_content[to_point] < CHECKERS_BLOCKED)
+            if game_state_prime.points_content[to_point] < 0:
+                # Existing point.
+                game_state_prime.points_content[to_point] -= 1
+
+            elif game_state_prime.points_content[to_point] == 0:
+                # New point acquired.
+                game_state_prime.points_content[to_point] = -1
+                game_state_prime.white_checkers.append(to_point)
+                game_state_prime.white_checkers.sort(reverese=True) 
+
+            elif game_state_prime.points_content[to_point] > 0:
+                # Take piece.
+                game_state_prime.points_content[to_point] = 1
+                game_state_prime.white_checkers.append(to_point)
+                game_state_prime.white_checkers.sort(reverese=True) 
+                game_state_prime.black_checkers.remove(to_point)
+                game_state_prime.black_checkers.sort()
+        
+        return game_state_prime
+        
 
     def calculate_score(self, game_state:BackgammonState,
                         agent_id:int) -> int:
