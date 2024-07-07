@@ -122,6 +122,10 @@ class BackgammonRules(GameRules):
         Returns a list of Action instances that are legal for Agent ID
         in a given GameState.
 
+        This method uses the approach outlined in the article from Hans
+        J. Berliner (1977), which can be found at (accessed on 7 July
+        2024): https://bkgm.com/articles/Berliner/BKG-AProgramThatPlaysBackgammon/#sec-III-A
+
         Args:
             game_state (BackgammonState): BackgammonState s.
             agent_id (int): Agent ID.
