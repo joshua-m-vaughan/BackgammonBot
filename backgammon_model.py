@@ -148,12 +148,11 @@ class BackgammonRules(GameRules):
         faces.sort()
 
         # Generate play sequences.
-        node = PlayNode(None, game_state)
-        self._generate_play_tree(node, faces)
+        root = PlayNode(None, game_state)
+        self._generate_play_tree(root, faces)
 
         # Extract play sequences using DFS
-
-        return None
+        return self._extract_actions(root)
     
     def _extract_actions(self, root:PlayNode) -> list[tuple]:
         """_extract_actions
@@ -171,7 +170,7 @@ class BackgammonRules(GameRules):
         stack.put((root, []))
 
         # Perform DFS extraction
-        return self._extract_play_tree_dfs(self, stack, [])
+        return self._extract_play_tree_dfs(stack, [])
 
 
     def _extract_play_tree_dfs(self, stack:LifoQueue, actions:list) -> list:
@@ -188,7 +187,7 @@ class BackgammonRules(GameRules):
         node, sequence = stack.get()
 
         # Evaluate end condition.
-        if node is None:
+        if node is None or stack.empty():
             actions.append(sequence)
             return actions
 
@@ -251,7 +250,7 @@ class BackgammonRules(GameRules):
                 # Determine move.
                 for point in root.state.black_checkers:
                     move = (point,
-                            point + faces[0],
+                            max(point + faces[0], BLACK_HOME_POINT),
                             faces[0])
                     
                     if self._evaluate_valid_bear_off(root.state, move):
@@ -269,7 +268,7 @@ class BackgammonRules(GameRules):
                 # Determine move.
                 for point in root.state.white_checkers:
                     move = (point,
-                            point - faces[0],
+                            min(point - faces[0], WHITE_HOME_POINT),
                             faces[0])
                     
                     if self._evaluate_valid_bear_off(root.state, move):
@@ -290,7 +289,7 @@ class BackgammonRules(GameRules):
                 # Determine move.
                 for point in root.state.black_checkers:
                     move = (point,
-                            point + faces[0],
+                            max(point + faces[0], BLACK_HOME_POINT),
                             faces[0])
                     
                     if self._evaluate_valid_move(root.state, move):
@@ -308,7 +307,7 @@ class BackgammonRules(GameRules):
                 # Determine move.
                 for point in root.state.white_checkers:
                     move = (point,
-                            point - faces[0],
+                            min(point - faces[0], WHITE_HOME_POINT),
                             faces[0])
                     
                     if self._evaluate_valid_move(root.state, move):
@@ -342,7 +341,10 @@ class BackgammonRules(GameRules):
             bool: True if valid, False otherwise.
         """
         (from_point, to_point, face) = move
-        assert (abs(to_point - from_point) == face)
+
+        # Check if attempting to bear off.
+        if (abs(to_point - from_point) != face):
+            return False
 
         if (game_state.current_agent_id == BLACK_ID and
             game_state.points_content[to_point] > -CHECKERS_BLOCKED and
