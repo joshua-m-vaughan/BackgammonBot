@@ -166,7 +166,7 @@ class BackgammonRules(GameRules):
         """
 
         # Initialise stack.
-        stack = LifoQueue(maxsize=DOUBLES_MULTIPLIER)
+        stack = LifoQueue(maxsize=0)
         stack.put((root, []))
 
         # Perform DFS extraction
