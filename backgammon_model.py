@@ -10,6 +10,7 @@
 # IMPORTS ------------------------------------------------------------ #
 
 from copy import deepcopy
+from queue import LifoQueue
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 from backgammon_tree import PlayNode
@@ -147,13 +148,60 @@ class BackgammonRules(GameRules):
         faces.sort()
 
         # Generate play sequences.
-        # node = Node()
-        # self._generate_play_tree(node, faces)
+        node = PlayNode(None, game_state)
+        self._generate_play_tree(node, faces)
 
         # Extract play sequences using DFS
 
         return None
     
+    def _extract_actions(self, root:PlayNode) -> list[tuple]:
+        """_extract_actions
+        DFS of play tree to extract valid action sequences.
+
+        Args:
+            root (PlayNode): Root node of play tree.
+
+        Returns:
+            list[tuple]: _description_
+        """
+
+        # Initialise stack.
+        stack = LifoQueue(maxsize=DOUBLES_MULTIPLIER)
+        stack.put((root, []))
+
+        # Perform DFS extraction
+        return self._extract_play_tree_dfs(self, stack, [])
+
+
+    def _extract_play_tree_dfs(self, stack:LifoQueue, actions:list) -> list:
+        """_extract_play_tree_dfs
+
+        Args:
+            stack (LifoQueue): Stack for DFS.
+            actions (list): Set of extracted actions.
+
+        Returns:
+            list: Extracted actions.
+        """
+        # Extract next element in stack.
+        node, sequence = stack.get()
+
+        # Evaluate end condition.
+        if node is None:
+            actions.append(sequence)
+            return actions
+
+        # Update stack with next depth of nodes.
+        for child in node.children:
+            new_sequence = deepcopy(sequence)
+            new_sequence.append(child.move)
+            stack.put((child, new_sequence))
+
+        # Continue DFS.
+        self._extract_play_tree_dfs(stack, actions)
+        
+
     def _generate_play_tree(self, root:PlayNode, faces:list[int]) -> None:
         """_generate_play_tree
 
@@ -173,7 +221,8 @@ class BackgammonRules(GameRules):
             return root
         
         # Validate board state
-        if self._evaluate_board_state(root.state) == ON_BAR:
+        board_state = self._evaluate_board_state(root.state)
+        if board_state == ON_BAR:
             
             # Determine move.
             if root.state.current_agent_id == BLACK_ID:
@@ -195,7 +244,7 @@ class BackgammonRules(GameRules):
                 # Recursive call on new search state node with unsused faces.
                 self._generate_play_tree(node_prime, faces[:-1])
 
-        elif self._evaluate_board_state(root.state) == BEAR_OFF:
+        elif board_state == BEAR_OFF:
             
             if root.state.current_agent_id == BLACK_ID:
                 
@@ -233,7 +282,7 @@ class BackgammonRules(GameRules):
                         # Recursive call on new search state node with unsused faces.
                         self._generate_play_tree(node_prime, faces[:-1])
 
-        elif self._evaluate_board_state(root.state) == NORMAL:
+        elif board_state == NORMAL:
             pass
             
             if root.state.current_agent_id == BLACK_ID:
@@ -565,6 +614,8 @@ if __name__ == "__main__":
     print(str(bs))
     bgr = BackgammonRules()
     print("BLACK PIP SCORE: "+str(bgr.calculate_score(bs, BLACK_ID)))
-    bgr.get_legal_actions(bs, 0)
+    actions = bgr.get_legal_actions(bs, 0)
+    print(actions)
+
 
 # END ---------------------------------------------------------------- #

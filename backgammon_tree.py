@@ -7,8 +7,6 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from backgammon_model import BackgammonState
-
 # CONSTANTS ---------------------------------------------------------- #
 
 # CLASS DEF ---------------------------------------------------------- #
@@ -18,8 +16,7 @@ class PlayNode():
     # Implement variables for tracking instances.
     next_node_id = 0
 
-    def __init__(self, parent, state:BackgammonState,
-                 move:tuple = None) -> None:
+    def __init__(self, parent, state, move:tuple = None) -> None:
         
         # Assign node an ID.
         self.id = PlayNode.next_node_id
