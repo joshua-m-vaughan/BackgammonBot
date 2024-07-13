@@ -145,11 +145,12 @@ class BackgammonRules(GameRules):
         # Rules require that if only one move can be played, it is done
         # with the largest rolled face. As such, each play sequence,
         # will be generated with this property in mind.
-        faces.sort()
+        faces.sort(reverse=True)
 
         # Generate play sequences.
         root = PlayNode(None, game_state)
         self._generate_play_tree(root, faces)
+        print(str(root))
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
@@ -242,7 +243,7 @@ class BackgammonRules(GameRules):
                 # Add new search state node to set of children.
                 root.children.append(node_prime)
                 # Recursive call on new search state node with unsused faces.
-                self._generate_play_tree(node_prime, faces[:-1])
+                self._generate_play_tree(node_prime, faces[1:])
 
         elif board_state == BEAR_OFF:
             
@@ -262,7 +263,7 @@ class BackgammonRules(GameRules):
                         # Add new search state node to set of children.
                         root.children.append(node_prime)
                         # Recursive call on new search state node with unsused faces.
-                        self._generate_play_tree(node_prime, faces[:-1])
+                        self._generate_play_tree(node_prime, faces[1:])
                     
             else:
 
@@ -280,7 +281,7 @@ class BackgammonRules(GameRules):
                         # Add new search state node to set of children.
                         root.children.append(node_prime)
                         # Recursive call on new search state node with unsused faces.
-                        self._generate_play_tree(node_prime, faces[:-1])
+                        self._generate_play_tree(node_prime, faces[1:])
 
         elif board_state == NORMAL:
             
@@ -300,7 +301,7 @@ class BackgammonRules(GameRules):
                         # Add new search state node to set of children.
                         root.children.append(node_prime)
                         # Recursive call on new search state node with unsused faces.
-                        self._generate_play_tree(node_prime, faces[:-1])
+                        self._generate_play_tree(node_prime, faces[1:])
                     
             else:
 
@@ -318,7 +319,7 @@ class BackgammonRules(GameRules):
                         # Add new search state node to set of children.
                         root.children.append(node_prime)
                         # Recursive call on new search state node with unsused faces.
-                        self._generate_play_tree(node_prime, faces[:-1])
+                        self._generate_play_tree(node_prime, faces[1:])
 
     def _evaluate_valid_move(self, game_state:BackgammonState,
                              move:tuple) -> bool:
