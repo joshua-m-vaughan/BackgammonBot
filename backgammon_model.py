@@ -476,9 +476,17 @@ class BackgammonRules(GameRules):
         
         game_state_prime = deepcopy(game_state)
 
+        # Update board state
         for move in action:
             game_state_prime = self._update_game_state(game_state_prime,
                                                        move)
+        
+        # Update player turn.
+        if game_state.current_agent_id == BLACK_ID:
+            game_state_prime.current_agent_id = WHITE_ID
+        else:
+            game_state_prime.current_agent_id = BLACK_ID
+
         return game_state_prime
 
     
@@ -525,6 +533,7 @@ class BackgammonRules(GameRules):
                 game_state.black_checkers.sort()
                 game_state.white_checkers.remove(to_point)
                 game_state.white_checkers.sort(reverese=True)
+                game_state.white_checkers_taken += 1
         
         elif game_state.current_agent_id == WHITE_ID:
             # Pick up checker.
@@ -552,6 +561,7 @@ class BackgammonRules(GameRules):
                 game_state.white_checkers.sort(reverese=True) 
                 game_state.black_checkers.remove(to_point)
                 game_state.black_checkers.sort()
+                game_state.black_checkers_taken += 1
         
         return game_state
         
