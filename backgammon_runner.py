@@ -9,8 +9,14 @@
 
 import argparse
 import sys
+from ExtendedFormGame.template import Agent
+from backgammon_model import BackgammonRules
+from ExtendedFormGame.game import Game
+from Agents.generic.random_agent import RandomAgent
 
 # CONSTANTS ---------------------------------------------------------- #
+
+SEED:int = 42 # The meaning of life!
 
 # FUNC DEF ----------------------------------------------------------- #
 
@@ -30,5 +36,19 @@ def load_parameters():
     return parser.parse_args(sys.argv[1:])
 
 # MAIN --------------------------------------------------------------- #
+
+if __name__ == "__main__":
+    # Instantiate classes.
+    bg_rules:BackgammonRules = BackgammonRules()
+    bg_random_one:Agent = RandomAgent(0)
+    bg_random_two:Agent = RandomAgent(1)
+    agent_list: list[tuple] = [bg_random_one, bg_random_two]
+    agent_names:list[str] = ["rand_one", "rand_two"]
+
+    bg = Game(bg_rules, agent_list, agent_names, 2, SEED)
+    history = bg.run()
+    print("\n"*3)
+    print("History: ")
+    print(history)
 
 # END ---------------------------------------------------------------- #
