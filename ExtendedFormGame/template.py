@@ -148,7 +148,7 @@ class Agent():
         self.id: int = id
  
     def select_action(self, game_state:GameState,
-                      actions:list[Action]) -> Action:
+                      actions:list[tuple]) -> tuple:
         """select_action
         Given a set of available actions for the agent to execute, and
         a copy of the current game state (including that of the agent),
