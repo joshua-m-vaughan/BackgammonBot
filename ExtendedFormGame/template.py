@@ -144,8 +144,8 @@ class GameRules:
         return self.current_agent_id
     
 class Agent():
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, id:int) -> None:
+        self.id: int = id
  
     def select_action(self, game_state:GameState,
                       actions:list[Action]) -> Action:
