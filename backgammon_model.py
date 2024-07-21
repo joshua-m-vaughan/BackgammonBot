@@ -539,7 +539,7 @@ class BackgammonRules(GameRules):
                 game_state.black_checkers.append(to_point)
                 game_state.black_checkers.sort()
                 game_state.white_checkers.remove(to_point)
-                game_state.white_checkers.sort(reverese=True)
+                game_state.white_checkers.sort(reverse=True)
                 game_state.white_checkers_taken += 1
         
         elif game_state.current_agent_id == WHITE_ID:
@@ -559,13 +559,13 @@ class BackgammonRules(GameRules):
                 # New point acquired.
                 game_state.points_content[to_point] = -1
                 game_state.white_checkers.append(to_point)
-                game_state.white_checkers.sort(reverese=True) 
+                game_state.white_checkers.sort(reverse=True) 
 
             elif game_state.points_content[to_point] > 0:
                 # Take piece.
                 game_state.points_content[to_point] = 1
                 game_state.white_checkers.append(to_point)
-                game_state.white_checkers.sort(reverese=True) 
+                game_state.white_checkers.sort(reverse=True) 
                 game_state.black_checkers.remove(to_point)
                 game_state.black_checkers.sort()
                 game_state.black_checkers_taken += 1
