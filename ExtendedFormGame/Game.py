@@ -11,7 +11,7 @@
 from copy import deepcopy
 from func_timeout import func_timeout, FunctionTimedOut
 import random
-from template import Agent, GameRules, GameState
+from ExtendedFormGame.template import Agent, GameRules, GameState
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -21,7 +21,7 @@ WARMUP = 10 # Warm-up period for each agent on their first turn.
 
 class Game():
 
-    def __init__(self, GameRules:GameRules, agent_list:Agent,
+    def __init__(self, game_rules:GameRules, agent_list:Agent,
                  agent_names:list[str], num_agents:int,
                  seed:int = 1, time_limit:int = 1,
                  warning_limit:int = 3) -> None:
@@ -50,7 +50,7 @@ class Game():
             assert(player.id == i)
             i += 1
 
-        self.game_rule = GameRules(num_agents)
+        self.game_rule = game_rules
         self.agents = agent_list
         self.agents_names = agent_names
         self.num_agents = num_agents
@@ -68,7 +68,7 @@ class Game():
         history:dict = {"actions":[]}
         self.game_rule.action_counter = 0
 
-        while not self.game_rule.game_ends():
+        while not self.game_rule.game_ends(self.game_rule.current_game_state):
             
             # Current state of the game.
             agent_index:int = self.game_rule.current_agent_index
