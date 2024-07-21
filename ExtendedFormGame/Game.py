@@ -71,12 +71,12 @@ class Game():
         while not self.game_rule.game_ends(self.game_rule.current_game_state):
             
             # Current state of the game.
-            agent_index:int = self.game_rule.current_agent_index
-            assert (agent_index < self.num_agents)
-            agent:Agent = self.agents[self.game_rule.current_agent_index]
+            agent_id:int = self.game_rule.current_agent_id
+            assert (agent_id < self.num_agents)
+            agent:Agent = self.agents[self.game_rule.current_agent_id]
             game_state:GameState = self.game_rule.current_game_state
             actions:tuple = self.game_rule.get_legal_actions(game_state,
-                                                             self.game_rule.current_agent_index)
+                                                             self.game_rule.current_agent_id)
             gs_copy:GameState = deepcopy(game_state)
             actions_copy:tuple = deepcopy(actions)
             
@@ -93,31 +93,31 @@ class Game():
                 timed_out = True
 
             # Evaluate if agent broke game rules in selecting an action.
-            if agent_index != self.game_rule.num_agents:
+            if agent_id != self.game_rule.num_agents:
                 if not timed_out:
                     if selected not in actions:
                         illegal_action = True
             
             if timed_out or illegal_action:
-                self.warnings[agent_index] += 1
-                self.warning_positions.append((agent_index, self.game_rule.action_counter))
+                self.warnings[agent_id] += 1
+                self.warning_positions.append((agent_id, self.game_rule.action_counter))
                 selected = random.choice(actions)
 
             # Update game tracking, and the game state for the next
             # turn.
             history["actions"].append({self.game_rule.action_counter:
-                                       {"agent_id":self.game_rule.current_agent_index,
+                                       {"agent_id":self.game_rule.current_agent_id,
                                         "action":selected}})
             self.game_rule.update(selected)
 
             # Early exit if there is an incorrect agent reference or warnings
             # are exceeded.
-            if ((agent_index != self.game_rule.num_of_agent) and
-                (self.warnings[agent_index] == self.warning_limit)):
+            if ((agent_id != self.game_rule.num_of_agent) and
+                (self.warnings[agent_id] == self.warning_limit)):
                     history = self._end_game(self.game_rule.num_of_agent,
                                              history,
                                              isTimeOut=True,
-                                             id=agent_index)
+                                             id=agent_id)
                     return history
                 
         # Score agent bonuses
