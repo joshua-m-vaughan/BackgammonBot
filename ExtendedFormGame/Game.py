@@ -16,6 +16,7 @@ from ExtendedFormGame.template import Agent, GameRules, GameState
 # CONSTANTS ---------------------------------------------------------- #
 
 WARMUP = 10 # Warm-up period for each agent on their first turn.
+WINNING_PIP_VALUE = 0
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -136,6 +137,20 @@ class Game():
             time_out_id (int, optional): Integer of timed out agent.
             Defaults to None.
         """
+        # Include game setup details.
+        history.update({"seed":self.seed,
+                        "num_of_agent":self.num_agents,
+                        "agents_namelist":self.agents_names,
+                        "warning_positions":self.warning_positions,
+                        "warning_limit":self.warning_limit})
+        # Game scores.
+        history["scores"]= {i:0 for i in range(self.num_agents)}
+        if is_time_out:
+            history["scores"][time_out_id] = -1
+        else:
+            for i in range(self.num_agents):
+                history["scores"].update({i:self.game_rule.calculate_endgame_score(self.game_rule.current_game_state,i)})
+        
         return history
         
         
