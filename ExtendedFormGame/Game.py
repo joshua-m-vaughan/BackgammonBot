@@ -89,6 +89,7 @@ class Game():
                                               args=(gs_copy, actions_copy))
             except FunctionTimedOut:
                 print( "Agent "+str(agent)+" timed out on action "+str(self.game_rule.action_counter)+".\n")
+                selected = None
                 timed_out = True
 
             # Evaluate if agent broke game rules in selecting an action.
@@ -108,6 +109,8 @@ class Game():
                                        {"agent_id":self.game_rule.current_agent_id,
                                         "action":selected}})
             self.game_rule.update(selected)
+
+            print("Action: " + str(selected))
 
             # Early exit if there is an incorrect agent reference or warnings
             # are exceeded.
