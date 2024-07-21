@@ -154,10 +154,10 @@ class BackgammonRules(GameRules):
         # TECH DEBT: This shuold go to a log file!
         if self.current_agent_id == BLACK_ID:
             print("TURN "+str(self.action_counter)+": BLACK")
-            print(root)
         else:
             print("TURN "+str(self.action_counter)+": WHITE")
-            print(root)
+        print(self.current_game_state)
+        print(root)
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
@@ -466,8 +466,9 @@ class BackgammonRules(GameRules):
             else:
                 return NORMAL
     
-    def generate_successor(self, game_state: GameState,
-                           action:list[tuple], agent_id:int) -> GameState:
+    def generate_successor(self, game_state: BackgammonState,
+                           action:list[tuple],
+                           agent_id:int) -> BackgammonState:
         """generate_successor
         Returns the successive GameState s' for applying Action a on 
         Agent agent_id in GameState s.
@@ -481,7 +482,7 @@ class BackgammonRules(GameRules):
             GameState: GameState s'.
         """
         
-        game_state_prime = deepcopy(game_state)
+        game_state_prime:BackgammonState = deepcopy(game_state)
 
         # Update board state
         for move in action:
@@ -493,6 +494,9 @@ class BackgammonRules(GameRules):
             game_state_prime.current_agent_id = WHITE_ID
         else:
             game_state_prime.current_agent_id = BLACK_ID
+
+        # Roll dice.
+        game_state_prime.roll()
 
         return game_state_prime
 
