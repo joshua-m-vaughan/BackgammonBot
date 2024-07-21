@@ -14,7 +14,7 @@ from importlib import import_module
 from ExtendedFormGame.template import Agent
 from backgammon_model import BackgammonRules
 from ExtendedFormGame.game import Game
-from Agents.generic.random_agent import myAgent as randomAgent
+from Agents.generic.random_agent import myAgent as RandomAgent
 from datetime import datetime, timedelta
 
 
