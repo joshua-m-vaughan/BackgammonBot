@@ -23,7 +23,8 @@ from datetime import datetime, timedelta
 SEED:int = 42 # The meaning of life!
 MAX_EPISODES:int = 1000 # Number of training episodes.
 MAX_DURATION:int = 1 # Duration of training in hours.
-AGENTS_PATH = "Agents\\"
+AGENTS_PATH:str = "Agents."
+RESULTS_PATH:str = None
 
 # FUNC DEF ----------------------------------------------------------- #
 
@@ -59,6 +60,7 @@ def load_agent(agent_names:list,
         indicating if the agents were valid.
     """
     agent_list = [None] * len(agent_names)
+    valid_game = True
     for i in range(len(agent_names)):
         tmp_agent = None
         try:
@@ -68,19 +70,21 @@ def load_agent(agent_names:list,
             print('Error: Agent at "' + agent_names[i] + '" could not be loaded!', file=sys.stderr)
             traceback.print_exc()
             pass
-        except:
+        finally:
             pass
 
         # Use a random agent, if agent was unable to be loaded.
-        if tmp_agent != None:
+        if tmp_agent is not None:
             agent_list[i] = tmp_agent
             # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
         else:
             valid_game = False
-            agent_list[i] = RandomAgent
+            agent_list[i] = RandomAgent(i)
             # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
 
-        return tuple(agent_list, valid_game)
+        print(agent_list)
+
+    return (agent_list, valid_game)
 
 def train(agent_names:list, results_path: str, seed:int = SEED,
           max_episodes:int = MAX_EPISODES,
@@ -127,6 +131,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         
         # Run game.
         history = bg_game.run()
+        print(history)
 
         # Update agents based on outcome of the game.
         # TODO: Implement this, including saving of weights.
@@ -149,16 +154,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
 
 if __name__ == "__main__":
     # Instantiate classes.
-    bg_rules:BackgammonRules = BackgammonRules()
-    bg_random_one:Agent = RandomAgent(0)
-    bg_random_two:Agent = RandomAgent(1)
-    agent_list: list[tuple] = [bg_random_one, bg_random_two]
-    agent_names:list[str] = ["rand_one", "rand_two"]
-
-    bg = Game(bg_rules, agent_list, agent_names, 2, SEED)
-    history = bg.run()
-    print("\n"*3)
-    print("History: ")
-    print(history)
+    agent_names:list[str] = ["generic.random_agent", "generic.random_agent"]
+    train(agent_names, RESULTS_PATH, max_episodes=5)
 
 # END ---------------------------------------------------------------- #
