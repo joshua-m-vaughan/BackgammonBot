@@ -15,7 +15,7 @@ import random
 
 # CLASS DEF ----------------------------------------------------------------------------------------------------------#  
 
-class RandomAgent(Agent):
+class myAgent(Agent):
     def __init__(self,_id: int) -> None:
         super().__init__(_id)
     

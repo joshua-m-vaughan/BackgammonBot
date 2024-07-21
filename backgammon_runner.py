@@ -9,17 +9,21 @@
 
 import argparse
 import sys
+import traceback
+from importlib import import_module
 from ExtendedFormGame.template import Agent
 from backgammon_model import BackgammonRules
 from ExtendedFormGame.game import Game
-from Agents.generic.random_agent import RandomAgent
+from Agents.generic.random_agent import myAgent as randomAgent
 from datetime import datetime, timedelta
+
 
 # CONSTANTS ---------------------------------------------------------- #
 
 SEED:int = 42 # The meaning of life!
 MAX_EPISODES:int = 1000 # Number of training episodes.
 MAX_DURATION:int = 1 # Duration of training in hours.
+AGENTS_PATH = "Agents\\"
 
 # FUNC DEF ----------------------------------------------------------- #
 
@@ -37,6 +41,46 @@ def load_parameters():
 
     # Read args from command line
     return parser.parse_args(sys.argv[1:])
+
+def load_agent(agent_names:list,
+               module_path:str = AGENTS_PATH) -> tuple[list[Agent], bool]:
+    """load_agent
+    Returns a list of agents loaded from different paths, extending the
+    approach in the extended form game framework from COMP90054
+    Assignment 3.   
+
+    Args:
+        agent_names (list): Agent names from agent module.
+        module_path (str, optional): Path to agent module. Defaults to
+        AGENTS_PATH.
+    
+    Returns:
+        tuple[list[Agent], bool]: A list of agents, and a boolean
+        indicating if the agents were valid.
+    """
+    agent_list = [None] * len(agent_names)
+    for i in range(len(agent_names)):
+        tmp_agent = None
+        try:
+            agent_module = import_module(module_path+agent_names[i])
+            tmp_agent = agent_module.myAgent(i)
+        except (NameError, ImportError, IOError):
+            print('Error: Agent at "' + agent_names[i] + '" could not be loaded!', file=sys.stderr)
+            traceback.print_exc()
+            pass
+        except:
+            pass
+
+        # Use a random agent, if agent was unable to be loaded.
+        if tmp_agent != None:
+            agent_list[i] = tmp_agent
+            # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
+        else:
+            valid_game = False
+            agent_list[i] = randomAgent
+            # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
+
+        return tuple(agent_list, valid_game)
 
 def train(agent_names:list, results_path: str, seed:int = SEED,
           max_episodes:int = MAX_EPISODES,
@@ -64,8 +108,17 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         # Create agents.
         assert(len(agent_names) == 2)
         num_agents = 2
-        agent_list = []
-        # TODO: Reverse halfway through training.
+        (agent_list, valid_game) = load_agent(agent_names)
+        if not valid_game:
+            # TECH DEBT: Should I throw some kind of log from here?
+            return False
+        
+        # Reverse the order of players halfway through training.
+        if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
+                or episode > ((MAX_EPISODES * 0.5)-1)):
+            # NOTE: Since we only have two players, we can just reverse
+            # the order of the list.
+            agent_list.reverse()
 
         # Create game.
         bg_rules = BackgammonRules()
