@@ -8,8 +8,10 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+from copy import deepcopy
+from func_timeout import func_timeout, FunctionTimedOut
 import random
-from template import Agent, GameRules
+from template import Agent, GameRules, GameState
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -57,12 +59,69 @@ class Game():
         self.warnings = [0]*num_agents
         self.warning_positions = []
 
-    def run(self) -> None:
+    def run(self) -> dict:
         """run
         This method runs a game until the termination state of the game
         is achieved.    
         """
-        return None
+
+        history:dict = {"actions":[]}
+        self.game_rule.action_counter = 0
+
+        while not self.game_rule.game_ends():
+            
+            # Current state of the game.
+            agent_index:int = self.game_rule.current_agent_index
+            assert (agent_index < self.num_agents)
+            agent:Agent = self.agents[self.game_rule.current_agent_index]
+            game_state:GameState = self.game_rule.current_game_state
+            actions:tuple = self.game_rule.get_legal_actions(game_state,
+                                                             self.game_rule.current_agent_index)
+            gs_copy:GameState = deepcopy(game_state)
+            actions_copy:tuple = deepcopy(actions)
+            
+
+            # Agent selects action.
+            timed_out:bool = False
+            illegal_action:bool = False
+            try: 
+                selected:tuple = func_timeout(WARMUP if self.game_rule.action_counter < len(self.agents) else self.time_limit,
+                                              agent. select_action,
+                                              args=(actions_copy, gs_copy))
+            except FunctionTimedOut:
+                print( "Agent "+str(agent)+" timed out on action "+str(self.game_rule.action_counter)+".\n")
+                timed_out = True
+
+            # Evaluate if agent broke game rules in selecting an action.
+            if agent_index != self.game_rule.num_agents:
+                if not timed_out:
+                    if selected not in actions:
+                        illegal_action = True
+            
+            if timed_out or illegal_action:
+                self.warnings[agent_index] += 1
+                self.warning_positions.append((agent_index, self.game_rule.action_counter))
+                selected = random.choice(actions)
+
+            # Update game tracking, and the game state for the next
+            # turn.
+            history["actions"].append({self.game_rule.action_counter:
+                                       {"agent_id":self.game_rule.current_agent_index,
+                                        "action":selected}})
+            self.game_rule.update(selected)
+
+            # Early exit if there is an incorrect agent reference or warnings
+            # are exceeded.
+            if ((agent_index != self.game_rule.num_of_agent) and
+                (self.warnings[agent_index] == self.warning_limit)):
+                    history = self._end_game(self.game_rule.num_of_agent,
+                                             history,
+                                             isTimeOut=True,
+                                             id=agent_index)
+                    return history
+                
+        # Score agent bonuses
+        return self._end_game(self.game_rule.num_of_agent,history,isTimeOut=False)
 
     def _end_game(self, history:dict, is_time_out:bool = False,
                   time_out_id:int = None) -> None:
