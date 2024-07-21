@@ -78,16 +78,15 @@ class Game():
             actions:tuple = self.game_rule.get_legal_actions(game_state,
                                                              self.game_rule.current_agent_id)
             gs_copy:GameState = deepcopy(game_state)
-            actions_copy:tuple = deepcopy(actions)
-            
+            actions_copy:tuple = deepcopy(actions)            
 
             # Agent selects action.
             timed_out:bool = False
             illegal_action:bool = False
             try: 
                 selected:tuple = func_timeout(WARMUP if self.game_rule.action_counter < len(self.agents) else self.time_limit,
-                                              agent. select_action,
-                                              args=(actions_copy, gs_copy))
+                                              agent.select_action,
+                                              args=(gs_copy, actions_copy))
             except FunctionTimedOut:
                 print( "Agent "+str(agent)+" timed out on action "+str(self.game_rule.action_counter)+".\n")
                 timed_out = True
@@ -112,16 +111,18 @@ class Game():
 
             # Early exit if there is an incorrect agent reference or warnings
             # are exceeded.
-            if ((agent_id != self.game_rule.num_of_agent) and
+            if ((agent_id != self.game_rule.num_agents) and
                 (self.warnings[agent_id] == self.warning_limit)):
-                    history = self._end_game(self.game_rule.num_of_agent,
+                    history = self._end_game(self.game_rule.num_agents,
                                              history,
                                              isTimeOut=True,
                                              id=agent_id)
                     return history
                 
         # Score agent bonuses
-        return self._end_game(self.game_rule.num_of_agent,history,isTimeOut=False)
+        return self._end_game(self.game_rule.num_agents,
+                              history,
+                              isTimeOut=False)
 
     def _end_game(self, history:dict, is_time_out:bool = False,
                   time_out_id:int = None) -> None:
