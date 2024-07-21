@@ -33,7 +33,6 @@ class RandomAgent(Agent):
         Returns:
             Action: Selected action instance.
         """
-        print(actions)
         return random.choice(actions)
     
 # END ---------------------------------------------------------------- #
