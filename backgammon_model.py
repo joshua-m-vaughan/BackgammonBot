@@ -629,6 +629,8 @@ class BackgammonRules(GameRules):
 class BackgammonAction(Action):
     pass
 
+# MAIN --------------------------------------------------------------- #
+
 if __name__ == "__main__":
     # Testing script
     bs = BackgammonState()
