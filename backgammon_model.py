@@ -172,12 +172,11 @@ class BackgammonRules(GameRules):
         self._generate_play_tree(root, faces)
 
         # TECH DEBT: This shuold go to a log file!
+        print(self.current_game_state)
         if self.current_agent_id == BLACK_ID:
             print("TURN "+str(self.action_counter)+": BLACK")
         else:
             print("TURN "+str(self.action_counter)+": WHITE")
-        print(self.current_game_state)
-        print(root)
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
