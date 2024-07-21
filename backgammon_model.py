@@ -101,6 +101,8 @@ class BackgammonState(GameState):
                     not_all_zero = True
                 else:
                     output += "  " # White space.
+                if i >= 9:
+                    output += " "
             output += "\n"
             
         # Print dice.
