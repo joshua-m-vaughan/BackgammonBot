@@ -432,7 +432,7 @@ class BackgammonRules(GameRules):
             # with a face of two, move a checker from point 4 to
             # point 2.)
             else:
-                return self._evaluate_valid_move(game_state)
+                return self._evaluate_valid_move(game_state, move)
 
         elif (game_state.current_agent_id == WHITE_ID):
             # Move piece to home point.
