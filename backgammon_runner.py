@@ -77,7 +77,7 @@ def load_agent(agent_names:list,
             # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
         else:
             valid_game = False
-            agent_list[i] = randomAgent
+            agent_list[i] = RandomAgent
             # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
 
         return tuple(agent_list, valid_game)
