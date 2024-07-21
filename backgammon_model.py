@@ -431,7 +431,7 @@ class BackgammonRules(GameRules):
             # with a face of two, move a checker from point 4 to
             # point 2.)
             else:
-                return self._evaluate_valid_move(game_state)
+                return self._evaluate_valid_move(game_state, move)
 
     def _evaluate_board_state(self, game_state:BackgammonState) -> int:
         """_evaluate_board_state
