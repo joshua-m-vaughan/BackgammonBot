@@ -507,12 +507,6 @@ class BackgammonRules(GameRules):
         for move in action:
             game_state_prime = self._update_game_state(game_state_prime,
                                                        move)
-        
-        # Update player turn.
-        if game_state.current_agent_id == BLACK_ID:
-            game_state_prime.current_agent_id = WHITE_ID
-        else:
-            game_state_prime.current_agent_id = BLACK_ID
 
         # Roll dice.
         game_state_prime.roll()
