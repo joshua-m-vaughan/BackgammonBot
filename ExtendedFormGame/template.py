@@ -103,7 +103,23 @@ class GameRules:
         """
         utils.raiseNotDefined()
         return 0
+    
+    def calculate_endgame_score(self, game_state:GameState,
+                                agent_id:int) -> int:
+        """calculate_endgame_score
+        Returns the score for agent ID in GameState s, where s is an
+        endgame state.
 
+        Args:
+            game_state (GameState): GameState s.
+            agent_id (int): Agent ID.
+
+        Returns:
+            int: Integer representing the agent's score.
+        """
+        utils.raiseNotDefined()
+        return 0
+    
     def game_ends(self, game_state:GameState) -> bool:
         """game_ends
         Returns whether the game ends in GameState.

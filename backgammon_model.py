@@ -33,6 +33,9 @@ CHECKERS_BLOCKED:int = 2
 ON_BAR:int = -1
 NORMAL:int = 0
 BEAR_OFF:int = 1
+# Endgame scores
+LOSING_SCORE:int = 0
+WINNING_SCORE:int = 1
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -613,6 +616,29 @@ class BackgammonRules(GameRules):
                               abs(WHITE_HOME_POINT - point))
 
         return pip_score
+
+    def calculate_endgame_score(self, game_state:GameState,
+                                agent_id:int) -> int:
+        """calculate_endgame_score
+        Returns the score for agent ID in GameState s, where s is an
+        endgame state.
+
+        Args:
+            game_state (GameState): GameState s.
+            agent_id (int): Agent ID.
+
+        Returns:
+            int: Integer representing the agent's score.
+        """
+        # TECH DEBT: We would update the game here, to include the
+        # doubling cube in the game for the final game score.
+        
+        if self.calculate_score(game_state, agent_id) > 0:
+            return LOSING_SCORE
+        else:
+            # Player must have won, with a pip value of 0, as PIP value
+            # is bound to positive integers.
+            return WINNING_SCORE
 
     def game_ends(self, game_state:BackgammonState) -> bool:
         """game_ends
