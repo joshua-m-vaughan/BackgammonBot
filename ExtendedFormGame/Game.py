@@ -114,18 +114,13 @@ class Game():
 
             # Early exit if there is an incorrect agent reference or warnings
             # are exceeded.
-            if ((agent_id != self.game_rule.num_agents) and
-                (self.warnings[agent_id] == self.warning_limit)):
-                    history = self._end_game(self.game_rule.num_agents,
-                                             history,
-                                             isTimeOut=True,
-                                             id=agent_id)
-                    return history
+            if (self.warnings[agent_id] == self.warning_limit):
+                    return (self._end_game(history,
+                                           is_time_out=True,
+                                           time_out_id=agent_id))
                 
         # Score agent bonuses
-        return self._end_game(self.game_rule.num_agents,
-                              history,
-                              isTimeOut=False)
+        return (self._end_game(history, is_time_out=False))
 
     def _end_game(self, history:dict, is_time_out:bool = False,
                   time_out_id:int = None) -> None:
@@ -141,7 +136,7 @@ class Game():
             time_out_id (int, optional): Integer of timed out agent.
             Defaults to None.
         """
-        return None
+        return history
         
         
 
