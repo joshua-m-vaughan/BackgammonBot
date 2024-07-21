@@ -78,14 +78,32 @@ class BackgammonState(GameState):
                      random.randint(MIN_FACE_VALUE, MAX_FACE_VALUE)]
     
     def __str__(self) -> str:
-        output = ""
+        output: str = ""
+        tmp_points_content = deepcopy(self.points_content)
+        
+        # Write board labels.
         for i in range(len(self.points_content)):
-            if self.points_content[i] > 0:
-                output += (str(i) +" "+("B"*self.points_content[i]) + "\n")
-            elif self.points_content[i] < 0:
-                output += (str(i) +" "+("W"*-self.points_content[i]) + "\n")
-            else:
-                output += (str(i) + "\n")
+            output += str(i) + " "
+        output += "\n"
+        
+        # Write pieces.
+        not_all_zero: bool = True
+        while (not_all_zero):
+            not_all_zero = False
+            for i in range(len(tmp_points_content)):
+                if tmp_points_content[i] > 0:
+                    output += "B "
+                    tmp_points_content[i] -= 1
+                    not_all_zero = True
+                elif tmp_points_content[i] < 0:
+                    output += "W "
+                    tmp_points_content[i] += 1
+                    not_all_zero = True
+                else:
+                    output += "  " # White space.
+            output += "\n"
+            
+        # Print dice.
         output += str("DICE: "+str(self.dice[0])+" "+str(self.dice[1]))
         return output
 
