@@ -150,7 +150,14 @@ class BackgammonRules(GameRules):
         # Generate play sequences.
         root = PlayNode(None, game_state)
         self._generate_play_tree(root, faces)
-        print(str(root))
+
+        # TECH DEBT: This shuold go to a log file!
+        if self.current_agent_id == BLACK_ID:
+            print("TURN "+str(self.action_counter)+": BLACK")
+            print(root)
+        else:
+            print("TURN "+str(self.action_counter)+": WHITE")
+            print(root)
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
@@ -585,7 +592,7 @@ class BackgammonRules(GameRules):
                               abs(BLACK_HOME_POINT - point))
         elif (agent_id == WHITE_ID):
             for point in game_state.white_checkers:
-                pip_score += (game_state.points_content[point] *
+                pip_score -= (game_state.points_content[point] *
                               abs(WHITE_HOME_POINT - point))
 
         return pip_score
@@ -623,12 +630,19 @@ class BackgammonAction(Action):
     pass
 
 if __name__ == "__main__":
+    # Testing script
     bs = BackgammonState()
     print(str(bs))
+
     bgr = BackgammonRules()
     print("BLACK PIP SCORE: "+str(bgr.calculate_score(bs, BLACK_ID)))
-    actions = bgr.get_legal_actions(bs, 0)
+    actions = bgr.get_legal_actions(bs, BLACK_ID)
+    print("BLACK ACTIONS: ")
     print(actions)
 
+    actions = bgr.get_legal_actions(bs, WHITE_ID)
+    print("WHITE PIP SCORE: "+str(bgr.calculate_score(bs, WHITE_ID)))
+    print("WHITE ACTIONS: ")
+    print(actions)
 
 # END ---------------------------------------------------------------- #
