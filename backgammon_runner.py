@@ -16,7 +16,7 @@ import json
 from ExtendedFormGame.template import Agent
 from backgammon_model import BackgammonRules
 from ExtendedFormGame.Game import Game
-from Agents.generic.random_agent import myAgent as RandomAgent
+from Agents.generic.random import myAgent as RandomAgent
 from datetime import datetime, timedelta
 
 
