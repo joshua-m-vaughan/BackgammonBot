@@ -11,9 +11,11 @@ import argparse
 import sys
 import traceback
 from importlib import import_module
+from pathlib import Path
+import json
 from ExtendedFormGame.template import Agent
 from backgammon_model import BackgammonRules
-from ExtendedFormGame.game import Game
+from ExtendedFormGame.Game import Game
 from Agents.generic.random_agent import myAgent as RandomAgent
 from datetime import datetime, timedelta
 
@@ -24,7 +26,7 @@ SEED:int = 42 # The meaning of life!
 MAX_EPISODES:int = 1000 # Number of training episodes.
 MAX_DURATION:int = 1 # Duration of training in hours.
 AGENTS_PATH:str = "Agents."
-RESULTS_PATH:str = None
+RESULTS_PATH:str = "Results\\"
 
 # FUNC DEF ----------------------------------------------------------- #
 
@@ -107,6 +109,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     episode:int = 0
     current_time:datetime = datetime.now()
     finish_time:datetime = current_time + timedelta(hours=max_duration)
+    file_time = current_time.strftime("%Y%m%d-%H%M")
 
     while (current_time < finish_time and episode < max_episodes):
         # Create agents.
@@ -133,11 +136,16 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         history = bg_game.run()
         print(history)
 
-        # Update agents based on outcome of the game.
+        # Update agents weights based on outcome of the game.
         # TODO: Implement this, including saving of weights.
 
         # Store the results.
-        # TODO: Implement this.
+        # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
+        file_str = results_path + file_time + "_" + str(episode) + ".json"
+        filename = Path(file_str)
+        with open(filename, "w") as file:
+            serialised = {str(key): value for key, value in history.items()}
+            json.dump(serialised, file)
 
         # Increment training variables.
         episode += 1
