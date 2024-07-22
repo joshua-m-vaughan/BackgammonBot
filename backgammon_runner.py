@@ -27,6 +27,7 @@ MAX_EPISODES:int = 1000 # Number of training episodes.
 MAX_DURATION:int = 1 # Duration of training in hours.
 AGENTS_PATH:str = "Agents."
 RESULTS_PATH:str = "Results\\"
+JSON_INDENT:int = 4 # One tab
 
 # FUNC DEF ----------------------------------------------------------- #
 
@@ -109,7 +110,16 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     episode:int = 0
     current_time:datetime = datetime.now()
     finish_time:datetime = current_time + timedelta(hours=max_duration)
-    file_time = current_time.strftime("%Y%m%d-%H%M")
+    file_time:datetime = current_time.strftime("%Y%m%d-%H%M")
+    wins:list[int] = [0] * len(agent_names)
+    ties:list[int] = [0] * len(agent_names)
+    losses:list[int] = [0] * len(agent_names)
+
+    # Initialise matches dictionary.
+    matches:dict = dict()
+    matches.update({"games":[]})
+    matches.update({"teams":{}})
+    matches.update({"num_games": episode})
 
     while (current_time < finish_time and episode < max_episodes):
         # Create agents.
@@ -126,6 +136,14 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
             # NOTE: Since we only have two players, we can just reverse
             # the order of the list.
             agent_list.reverse()
+
+        # Insert agents into log.
+        for i in range(len(agent_names)):
+            team_info:dict = dict()
+            team_info["agent"] = agent_names[i]
+            team_info["team_name"] = "TODO"
+            matches["teams"].update({i:team_info})
+
 
         # Create game.
         bg_rules = BackgammonRules()
@@ -145,7 +163,25 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         filename = Path(file_str)
         with open(filename, "w") as file:
             serialised = {str(key): value for key, value in history.items()}
-            json.dump(serialised, file)
+            json.dump(serialised, file, indent=JSON_INDENT)
+        
+        # Store training-level results.
+        game:dict = dict()
+        game.update({"valid_game":True})
+        for score in history["scores"]:
+            if score < 0:
+                game.update({"valid_game":False})
+                break
+        game.update({"filename":file_time + "_" + str(episode)})
+        game.update({"random_seed":seed})
+        game.update({"scores":history["scores"]})
+        matches["games"].append(game)
+
+        for i in range(len(agent_names)):
+            if (history["scores"][i] == 1):
+                wins[i] += 1
+            else:
+                losses[i] += 1
 
         # Increment training variables.
         episode += 1
@@ -153,6 +189,17 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     
     # Write training overview details.
     # e.g. elapsed episode time, number of games, agent names.
+    matches.update({"wins":wins})
+    matches.update({"ties":ties})
+    matches.update({"losses":losses})
+    matches.update({"win_percentage":[w/episode for w in wins]})
+    matches.update({"succ":True})
+
+    file_str = results_path + file_time + "_matches.json"
+    match_filename = Path(file_str)
+    with open(match_filename, "w") as file:
+        serialised = {str(key): value for key, value in matches.items()}
+        json.dump(serialised, file, indent=JSON_INDENT)
 
     return True
 
