@@ -45,7 +45,14 @@ class BackgammonState(GameState):
                  num_agents:int =NUM_BACKGAMMON_AGENTS,
                  agent_id:int =BLACK_ID) -> None:
         """__init__
-        Initialise an instance of BackgammonState class.
+        Initialise an instance of BackgammonState class using a modified
+        version of the representation proposed by Lishout, Chaslot, and
+        Uiterwijk.
+
+        References List:
+            Van Lishout, François & Chaslot, Guillaume & Uiterwijk, Jos.
+            (2007). Monte-Carlo tree search in backgammon. Computer
+            Games Workshop.
 
         Args:
             num_agents (int, optional): Number of agents in the game.
@@ -144,11 +151,11 @@ class BackgammonRules(GameRules):
                           agent_id:int) -> list[Action]:
         """get_legal_actions
         Returns a list of Action instances that are legal for Agent ID
-        in a given GameState.
+        in a given GameState using the approach proposed by Berliner.
 
-        This method uses the approach outlined in the article from Hans
-        J. Berliner (1977), which can be found at (accessed on 7 July
-        2024): https://bkgm.com/articles/Berliner/BKG-AProgramThatPlaysBackgammon/#sec-III-A
+        References List:
+            Hans J. Berliner (1977) BKG -- A Program that plays
+            Backgammon. Carnegie-Mellon University.
 
         Args:
             game_state (BackgammonState): BackgammonState s.
@@ -671,23 +678,5 @@ class BackgammonRules(GameRules):
 
 class BackgammonAction(Action):
     pass
-
-# MAIN --------------------------------------------------------------- #
-
-if __name__ == "__main__":
-    # Testing script
-    bs = BackgammonState()
-    print(str(bs))
-
-    bgr = BackgammonRules()
-    print("BLACK PIP SCORE: "+str(bgr.calculate_score(bs, BLACK_ID)))
-    actions = bgr.get_legal_actions(bs, BLACK_ID)
-    print("BLACK ACTIONS: ")
-    print(actions)
-
-    actions = bgr.get_legal_actions(bs, WHITE_ID)
-    print("WHITE PIP SCORE: "+str(bgr.calculate_score(bs, WHITE_ID)))
-    print("WHITE ACTIONS: ")
-    print(actions)
 
 # END ---------------------------------------------------------------- #
