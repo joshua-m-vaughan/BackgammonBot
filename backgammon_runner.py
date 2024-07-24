@@ -85,8 +85,6 @@ def load_agent(agent_names:list,
             agent_list[i] = RandomAgent(i)
             # TECH DEBT: Should I have some sort of value to store the success of the agents loaded?
 
-        print(agent_list)
-
     return (agent_list, valid_game)
 
 def train(agent_names:list, results_path: str, seed:int = SEED,
