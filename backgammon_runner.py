@@ -176,6 +176,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         game.update({"random_seed":seed})
         game.update({"scores":history["scores"]})
         matches["games"].append(game)
+        matches.update({"num_games": episode})
 
         for i in range(len(agent_names)):
             if (history["scores"][i] == 1):
@@ -209,7 +210,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
 
 if __name__ == "__main__":
     # Instantiate classes.
-    agent_names:list[str] = ["generic.random_agent", "generic.random_agent"]
+    agent_names:list[str] = ["generic.random", "generic.random"]
     train(agent_names, RESULTS_PATH, max_episodes=5)
 
 # END ---------------------------------------------------------------- #
