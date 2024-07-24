@@ -7,6 +7,7 @@
 
 # IMPORTS ------------------------------------------------------------------------------------------------------------#
 
+from copy import deepcopy
 from math import inf
 from ExtendedFormGame.template import Agent, GameRules, GameState
 import random
@@ -68,7 +69,8 @@ class myAgent(Agent):
         Returns:
             float: heuristic value
         """
-        game_state_prime = self.game_rules.generate_successor(game_state,
+        tmp_game_state = deepcopy(game_state)
+        game_state_prime = self.game_rules.generate_successor(tmp_game_state,
                                                               action,
                                                               self.id)
         heuristic:float = (self.game_rules.calculate_score(game_state_prime, self.id)
