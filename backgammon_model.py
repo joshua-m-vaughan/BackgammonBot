@@ -505,7 +505,7 @@ class BackgammonRules(GameRules):
             if game_state.white_checkers_taken >= 1:
                 # Taken white pieces on bar.
                 return ON_BAR
-            elif game_state.white_checkers[-1] <= WHITE_HOME_BORDER:
+            elif game_state.white_checkers[0] <= WHITE_HOME_BORDER:
                 # All white pieces in white home board.
                 assert (game_state.white_checkers_taken < 1)
                 return BEAR_OFF
