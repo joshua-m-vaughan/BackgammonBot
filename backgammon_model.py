@@ -114,7 +114,11 @@ class BackgammonState(GameState):
                 if i >= 9:
                     output += " "
             output += "\n"
-            
+        
+        # Print taken.
+        output += ("TAKEN: B" + str(self.black_checkers_taken) +
+                   " W" + str(self.white_checkers_taken) + "\n")
+
         # Print dice.
         output += str("DICE: "+str(self.dice[0])+" "+str(self.dice[1]))
         return output
@@ -177,16 +181,16 @@ class BackgammonRules(GameRules):
         # will be generated with this property in mind.
         faces.sort(reverse=True)
 
-        # Generate play sequences.
-        root = PlayNode(None, game_state)
-        self._generate_play_tree(root, faces)
-
         # TECH DEBT: This shuold go to a log file!
         print(game_state)
         if game_state.current_agent_id == BLACK_ID:
             print("TURN "+str(self.action_counter)+": BLACK")
         else:
             print("TURN "+str(self.action_counter)+": WHITE")
+
+        # Generate play sequences.
+        root = PlayNode(None, game_state)
+        self._generate_play_tree(root, faces)
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
@@ -346,7 +350,6 @@ class BackgammonRules(GameRules):
                     move = (point,
                             max(point - faces[0], WHITE_HOME_POINT),
                             faces[0])
-                    print("WHITE MOVE: "+str(move))
                     
                     if self._evaluate_valid_move(root.state, move):
                         # Generate new state after applying move.
@@ -384,18 +387,32 @@ class BackgammonRules(GameRules):
         if (abs(to_point - from_point) != face):
             return False
 
-        if (game_state.current_agent_id == BLACK_ID and
-            game_state.points_content[to_point] > -CHECKERS_BLOCKED and
-            to_point != BLACK_HOME_POINT):
-            assert(from_point in set(game_state.black_checkers))
-            return True
-        
-        elif (game_state.current_agent_id == WHITE_ID and
-            game_state.points_content[to_point] < CHECKERS_BLOCKED and
-            to_point != WHITE_HOME_POINT):
-            assert(from_point in set(game_state.white_checkers))
-            return True
-        
+        if (game_state.current_agent_id == BLACK_ID
+            and game_state.points_content[to_point] > -CHECKERS_BLOCKED):
+            # Piece moving from bar.
+            if (from_point == WHITE_HOME_POINT
+                  and game_state.black_checkers_taken > 0):
+                return True
+            # Piece moving from board.
+            elif (to_point != BLACK_HOME_POINT):
+                assert(from_point in set(game_state.black_checkers))
+                return True
+            else:
+                return False
+            
+        elif (game_state.current_agent_id == WHITE_ID
+              and game_state.points_content[to_point] < CHECKERS_BLOCKED):
+            # Piece moving from bar.
+            if (from_point == BLACK_HOME_POINT
+                  and game_state.white_checkers_taken > 0):
+                return True
+            # Piece moving from board.
+            elif (to_point != WHITE_HOME_POINT):
+                assert(from_point in set(game_state.white_checkers))
+                return True
+            else:
+                return False
+            
         else:
             return False
     
@@ -511,7 +528,9 @@ class BackgammonRules(GameRules):
         Returns:
             GameState: GameState s'.
         """
-        
+        # Assert that action is being applied to the correct agent.
+        assert(agent_id == game_state.current_agent_id)
+
         game_state_prime:BackgammonState = deepcopy(game_state)
 
         # Update board state
@@ -552,10 +571,14 @@ class BackgammonRules(GameRules):
 
         if game_state.current_agent_id == BLACK_ID:
             # Pick up checker.
-            assert (game_state.points_content[from_point] > 0)
-            game_state.points_content[from_point] -= 1
-            if game_state.points_content[from_point] == 0:
-                game_state.black_checkers.remove(from_point)
+            if from_point == WHITE_HOME_POINT:
+                game_state.black_checkers_taken -= 1
+            else:
+                assert (game_state.points_content[from_point] > 0)
+                game_state.points_content[from_point] -= 1
+                if game_state.points_content[from_point] == 0:
+                    game_state.black_checkers.remove(from_point)
+            
             
             # Put down checker.
             assert (game_state.points_content[to_point] > -CHECKERS_BLOCKED)
@@ -578,11 +601,14 @@ class BackgammonRules(GameRules):
         
         elif game_state.current_agent_id == WHITE_ID:
             # Pick up checker.
-            assert (game_state.points_content[from_point] < 0)
-            game_state.points_content[from_point] += 1
-            if game_state.points_content[from_point] == 0:
-                game_state.white_checkers.remove(from_point)
-            
+            if from_point == BLACK_HOME_POINT:
+                game_state.white_checkers_taken -= 1
+            else:
+                assert (game_state.points_content[from_point] < 0)
+                game_state.points_content[from_point] += 1
+                if game_state.points_content[from_point] == 0:
+                    game_state.white_checkers.remove(from_point)
+
             # Put down checker.
             assert (game_state.points_content[to_point] < CHECKERS_BLOCKED)
             if game_state.points_content[to_point] < 0:
@@ -597,7 +623,7 @@ class BackgammonRules(GameRules):
 
             elif game_state.points_content[to_point] > 0:
                 # Take piece.
-                game_state.points_content[to_point] = 1
+                game_state.points_content[to_point] = -1
                 game_state.white_checkers.append(to_point)
                 game_state.white_checkers.sort(reverse=True) 
                 game_state.black_checkers.remove(to_point)
