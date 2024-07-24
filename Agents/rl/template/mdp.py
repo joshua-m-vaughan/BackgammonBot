@@ -8,7 +8,7 @@
 
 from ExtendedFormGame.template import GameRules, GameState
 from ExtendedFormGame import utils
-from Agents.rl.qfunction import QFunction
+from Agents.rl.template.qfunction import QFunction
 
 # CONSTANTS ---------------------------------------------------------- #
 

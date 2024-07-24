@@ -11,7 +11,7 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from Agents.rl.qfunction import QFunction
+from Agents.rl.template.qfunction import QFunction
 from ExtendedFormGame.template import Agent, GameState
 import random
 import math

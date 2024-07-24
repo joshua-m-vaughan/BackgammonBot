@@ -15,9 +15,9 @@ from collections import defaultdict
 from operator import add
 from copy import deepcopy
 
-from Agents.rl import Bandit
-from Agents.rl.mdp import MDP
-from Agents.rl.qfunction import QFunction
+from Agents.rl.template.bandit import Bandit
+from Agents.rl.template.mdp import MDP
+from Agents.rl.template.qfunction import QFunction
 from ExtendedFormGame import utils
 from ExtendedFormGame.template import GameState
 
