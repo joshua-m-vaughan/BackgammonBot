@@ -1,6 +1,7 @@
-# INFORMATION ------------------------------------------------------------------------------------------------------- #
+# INFORMATION -------------------------------------------------------- #
 
-# Author:  Josh Vaughan, utilising codebase provided in Tim Miller's RL online textbook.
+# Author:  Josh Vaughan, utilising codebase provided in Tim Miller's RL
+#          online textbook.
 # Date:    24/07/2024
 # Purpose: Implements Bandit for the Splendor game.
 
@@ -8,7 +9,7 @@
 #   - Miller, T. (2023) Multi-armed Bandits. rl-notes.
 #     https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
 
-# IMPORTS ------------------------------------------------------------------------------------------------------------#
+# IMPORTS ------------------------------------------------------------ #
 
 from Agents.rl.qfunction import QFunction
 from ExtendedFormGame.template import Agent, GameState
@@ -17,17 +18,18 @@ import math
 import ExtendedFormGame.utils as utils
 from collections import defaultdict
 
-# IMPORTS ------------------------------------------------------------------------------------------------------------#
+# CONSTANTS ---------------------------------------------------------- #
 
-DEFAULT_COUNT = int(0)
-PRIMED_COUNT = int(1)
-DEFAULT_EXPLORE = float(1)
-DEFAULT_EPSILON = float(0.5)
+DEFAULT_COUNT:int = int(0)
+PRIMED_COUNT:int = int(1)
+DEFAULT_EXPLORE:float = float(1.0)
+DEFAULT_EPSILON:float = float(0.5)
+DEFAULT_TAU:float = float(1.0)
 
-# CLASS DEF ----------------------------------------------------------------------------------------------------------#       
+# CLASS DEF ---------------------------------------------------------- #       
 
 class Bandit(Agent):
-    def __init__(self,_id: int, qfunction:QFunction) -> None:
+    def __init__(self, _id:int, qfunction:QFunction) -> None:
         super().__init__(_id)
         
         # Store Q-function for the Bandit and control QFunction access
@@ -57,12 +59,13 @@ class UCBOneBandit(Bandit):
         https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
     """
 
-    def __init__(self, _id, qfunction, default_count=DEFAULT_COUNT):
+    def __init__(self, _id:int, qfunction:QFunction,
+                 default_count:int = DEFAULT_COUNT) -> None:
         super().__init__(_id, qfunction)
         
         # Include counters for updates.
-        self.total = 0
-        self.times_selected = defaultdict(lambda: default_count)
+        self.total:int = 0
+        self.times_selected:dict = defaultdict(lambda: default_count)
 
     def select_action(self, game_state:GameState,
                       actions:list[tuple]) -> tuple:
@@ -85,14 +88,14 @@ class UCBOneBandit(Bandit):
                 return action
         
         # Argmax action for UCB1 approach.
-        max_actions = []
-        max_value = float("-inf")
+        max_actions:list[tuple] = []
+        max_value:float = float("-inf")
         for action in actions:
-            value = (self.qfunction.get_q_value(game_state, action)
-                        + math.sqrt(
-                        2 * math.log(self.total)
-                        / self.times_selected[str(action)]
-                        ))
+            value:float = (self.qfunction.get_q_value(game_state, action)
+                           + math.sqrt(
+                                2 * math.log(self.total)
+                                / self.times_selected[str(action)]
+                                ))
             if value > max_value:
                 max_value = value
                 max_actions = [action]
@@ -117,9 +120,10 @@ class SoftMaxBandit(Bandit):
         https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
     """
 
-    def __init__(self, _id, qfunction, tau=float(1.0)):
+    def __init__(self, _id:int, qfunction:QFunction,
+                 tau:float = float(1.0)) -> None:
         super().__init__(_id, qfunction)
-        self.tau = tau
+        self.tau:float = tau
 
     def select_action(self, game_state:GameState,
                       actions:list[tuple]) -> tuple:
@@ -133,19 +137,19 @@ class SoftMaxBandit(Bandit):
             tuple: The action according the Bandit's strategy.
         """
         # Calculate the denominator of the SoftMax function. 
-        denominator = float(0.0)
+        denominator:float = float(0.0)
         for action in actions:
             denominator += math.exp(self.qfunction.get_q_value(game_state, action)/ self.tau)
         
         rand = random.random()
-        cumulative_probability = float(0.0)
+        cumulative_probability:float = float(0.0)
         result = None
         for action in actions:
             probability = (math.exp(self.qfunction.get_q_value(game_state, action)
                                     / self.tau)
                            / denominator)
             # Draw from Boltzmann distribution.
-            if cumulative_probability <= rand <= cumulative_probability + probability:
+            if (cumulative_probability <= rand <= cumulative_probability + probability):
                 result = action
             # Update cumulative probability.
             cumulative_probability += probability
@@ -164,12 +168,14 @@ class UCT(Bandit):
         https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
     """
 
-    def __init__(self, _id, qfunction, explore = DEFAULT_EXPLORE, default_count=PRIMED_COUNT):
+    def __init__(self, _id:int, qfunction:QFunction,
+                 explore:float = DEFAULT_EXPLORE,
+                 default_count:float = PRIMED_COUNT) -> None:
         super().__init__(_id, qfunction)
         
         # Include counters for updates.
-        self.times_selected = defaultdict(lambda: default_count)
-        self.explore = explore
+        self.times_selected:dict = defaultdict(lambda: default_count)
+        self.explore:float = explore
 
     def select_action(self, game_state:GameState,
                       actions:list[tuple]) -> tuple:
@@ -183,20 +189,17 @@ class UCT(Bandit):
             tuple: The action according the Bandit's strategy.
         """
         # Initialise variables.
-        max_actions = []
-        max_value = float("-inf")
+        max_actions:list[tuple] = []
+        max_value:float = float("-inf")
 
         # Argmax action for UCB1 approach.
         for action in actions:
-            value = (self.qfunction.get_q_value(game_state, action)
-                        + (2 * self.explore 
-                        * (math.sqrt((2
-                                        * math.log(self.times_selected[str(game_state)]))
-                                        / self.times_selected[(str(action), str(game_state))]
-                                        )
-                            )
-                        )
-                    )
+            value:float = (self.qfunction.get_q_value(game_state, action)
+                           + (2 * self.explore 
+                              * (math.sqrt((2 * math.log(self.times_selected[str(game_state)]))
+                                            / self.times_selected[(str(action), str(game_state))]))
+                            ))
+            
             if value > max_value:
                 max_value = value
                 max_actions = [action]
@@ -221,9 +224,10 @@ class EpsilonGreedy(Bandit):
         https://gibberblot.github.io/rl-notes/single-agent/multi-armed-bandits.html
     """
 
-    def __init__(self, _id, qfunction, epsilon = DEFAULT_EPSILON):
+    def __init__(self, _id:int, qfunction:QFunction,
+                 epsilon:float = DEFAULT_EPSILON) -> None:
         super().__init__(_id, qfunction)
-        self.epsilon = epsilon
+        self.epsilon:float = epsilon
 
     def select_action(self, game_state:GameState,
                       actions:list[tuple]) -> tuple:
@@ -244,4 +248,4 @@ class EpsilonGreedy(Bandit):
     def __str__(self):
             return "UCT"
 
-# END FILE -----------------------------------------------------------------------------------------------------------#
+# END FILE ----------------------------------------------------------- #

@@ -1,22 +1,23 @@
-# INFORMATION ------------------------------------------------------------------------------------------------------- #
+# INFORMATION -------------------------------------------------------- #
 
 # Author:  Josh Vaughan.
 # Date:    24/07/2024
 # Purpose: Implements Q-function for an Agent.
 
-# IMPORTS ------------------------------------------------------------------------------------------------------------#
+# IMPORTS ------------------------------------------------------------ #
 
 from ExtendedFormGame.template import GameState
 import ExtendedFormGame.utils as utils
 import random
 
-# CONSTANTS ----------------------------------------------------------------------------------------------------------#
+# CONSTANTS ---------------------------------------------------------- #
 
-# CLASS DEF ----------------------------------------------------------------------------------------------------------#       
+# CLASS DEF ---------------------------------------------------------- #       
 
 class QFunction():
     
-    def get_q_value(self, game_game_state:GameState, action:tuple) -> float:
+    def get_q_value(self, game_game_state:GameState,
+                    action:tuple) -> float:
         """ get_q_value
         Return Q-value for action,game_state pair.
 
@@ -111,4 +112,4 @@ class QFunction():
         utils.raiseNotDefined()
         return 0
 
-# END FILE -----------------------------------------------------------------------------------------------------------#
+# END FILE ----------------------------------------------------------- #
