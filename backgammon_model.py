@@ -191,6 +191,9 @@ class BackgammonRules(GameRules):
         # Generate play sequences.
         root = PlayNode(None, game_state)
         self._generate_play_tree(root, faces)
+        if len(faces) != DOUBLES_MULTIPLIER:
+            faces.sort()
+            self._generate_play_tree(root, faces)
 
         # Extract play sequences using DFS
         return self._extract_actions(root)
@@ -252,10 +255,6 @@ class BackgammonRules(GameRules):
             faces (list[int]): List of faces to be used in play
             sequence.
         """
-        
-        # Initialise node value.
-        assert(root.children is None)
-        root.children = []
 
         # Validate exit condition: no more faces to consider.
         if len(faces) == 0:

@@ -24,7 +24,7 @@ class PlayNode():
 
         # Assign attribute values.
         self.parent = parent
-        self.children = None # TODO: Confirm if this is correct.
+        self.children = [] # TODO: Confirm if this is correct.
         self.state = state
         self.move = move
     

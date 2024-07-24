@@ -7,3 +7,6 @@
 - [ ] Create an evaluation script for agent.
 - [ ] Implement existing model from literature for comparison against previous iterations in the field.
 - [ ] Implement novel self-guided implementation for agent and train.
+- [X] Fix unable to play move when largest is unplayable - if this generates nothing, then skip to smallest one.
+    - TECH DEBT: This has been addressed by implementing a reverse order validation, which breaks the largest face first rule that prevents players from not playing a move when they can. 
+- [X] Fix tied endings, and why it is possible to have this occur.
