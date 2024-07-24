@@ -182,8 +182,8 @@ class BackgammonRules(GameRules):
         self._generate_play_tree(root, faces)
 
         # TECH DEBT: This shuold go to a log file!
-        print(self.current_game_state)
-        if self.current_agent_id == BLACK_ID:
+        print(game_state)
+        if game_state.current_agent_id == BLACK_ID:
             print("TURN "+str(self.action_counter)+": BLACK")
         else:
             print("TURN "+str(self.action_counter)+": WHITE")
@@ -346,6 +346,7 @@ class BackgammonRules(GameRules):
                     move = (point,
                             max(point - faces[0], WHITE_HOME_POINT),
                             faces[0])
+                    print("WHITE MOVE: "+str(move))
                     
                     if self._evaluate_valid_move(root.state, move):
                         # Generate new state after applying move.
@@ -520,6 +521,12 @@ class BackgammonRules(GameRules):
 
         # Roll dice.
         game_state_prime.roll()
+
+        # Update game state id.
+        if game_state.current_agent_id == BLACK_ID:
+            game_state_prime.current_agent_id = WHITE_ID
+        else:
+            game_state_prime.current_agent_id = BLACK_ID
 
         return game_state_prime
 
