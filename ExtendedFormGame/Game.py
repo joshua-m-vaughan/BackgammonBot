@@ -70,6 +70,8 @@ class Game():
         self.game_rule.action_counter = 0
 
         while not self.game_rule.game_ends(self.game_rule.current_game_state):
+            # Assert that logic of game and game state hasn't been lost.
+            assert(self.game_rule.current_agent_id == self.game_rule.current_game_state.current_agent_id)
             
             # Current state of the game.
             agent_id:int = self.game_rule.current_agent_id
