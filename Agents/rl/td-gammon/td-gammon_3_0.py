@@ -3,7 +3,7 @@
 # Author:  Josh Vaughan, leveraging the extended form game framework
 #          from COMP90054 Assignment 3.
 # Date:    22/07/2024
-# Purpose: Implements an agent for Backgammon using the TD-Gammon 0.0
+# Purpose: Implements an agent for Backgammon using the TD-Gammon 3.0
 #          approach outlined by Tesauro's paper.
 
 # Reference List:
@@ -27,7 +27,7 @@ from backgammon_model import BackgammonRules, BackgammonState
 BUFFER_TIME:float = float(0.25)
 FIRST_TURN_TIME:float = float(15.0)
 SUBSEQUENT_TURN_TIME:float = float(1.0)
-SIMULATION_DEPTH:int = int(1)
+SIMULATION_DEPTH:int = int(3)
 
 # CLASS DEF ---------------------------------------------------------- #  
 
