@@ -108,9 +108,9 @@ class Game():
 
             # Update game tracking, and the game state for the next
             # turn.
-            history["actions"].append({self.game_rule.action_counter:
-                                       {"agent_id":self.game_rule.current_agent_id,
-                                        "action":selected}})
+            history["actions"].append({"turn":self.game_rule.action_counter,
+                                       "agent_id":self.game_rule.current_agent_id,
+                                       "action":selected})
             self.game_rule.update(selected)
 
             print("Action: " + str(selected))
@@ -146,12 +146,12 @@ class Game():
                         "warning_positions":self.warning_positions,
                         "warning_limit":self.warning_limit})
         # Game scores.
-        history["scores"]= {i:0 for i in range(self.num_agents)}
+        history["scores"]= [0 for i in range(self.num_agents)]
         if is_time_out:
             history["scores"][time_out_id] = -1
         else:
             for i in range(self.num_agents):
-                history["scores"].update({i:self.game_rule.calculate_endgame_score(self.game_rule.current_game_state,i)})
+                history["scores"][i] = self.game_rule.calculate_endgame_score(self.game_rule.current_game_state, i)
         
         return history
         
