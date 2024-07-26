@@ -20,7 +20,6 @@ import random
 from Agents.rl.template.bandit import Bandit
 from Agents.rl.template.mdp import MDP
 from Agents.rl.template.qfunction import QFunction
-from ExtendedFormGame import utils
 from ExtendedFormGame.template import GameState
 
 # CONSTANTS ---------------------------------------------------------- #       
@@ -221,7 +220,7 @@ class MultiAgentNode():
         """
 
         if (not self.mdp.is_terminal_state(self.game_state, self.agent_id)
-            and sum(depth) < SIMULATION_LIMIT):
+            and depth < SIMULATION_LIMIT):
             # Select an action using heuristic.
             actions = self.mdp.get_actions(self.game_state, self.agent_id)
             action = self._heuristicSelect(actions, heuristic)
@@ -232,7 +231,7 @@ class MultiAgentNode():
             parent_id = 1 if self.agent_id == 0 else 0
             cum_reward[parent_id] += (pow(self.mdp.gamma, depth[parent_id])
                                           * self.reward[parent_id])
-            depth[self.agent_id] += 1
+            depth += 1
 
             # Simulate from next node.
             return child.simulate(cum_reward, depth)
