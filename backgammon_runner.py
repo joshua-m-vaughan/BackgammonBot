@@ -14,11 +14,12 @@ from importlib import import_module
 from pathlib import Path
 import json
 from ExtendedFormGame.template import Agent
-from backgammon_model import BackgammonRules
+from backgammon_model import BLACK_HOME_POINT, BLACK_ID, WHITE_HOME_POINT, WHITE_ID, BackgammonRules, BackgammonState
 from ExtendedFormGame.Game import Game
 from Agents.generic.random import myAgent as RandomAgent
 from datetime import datetime, timedelta
-
+import random
+import csv
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -116,8 +117,15 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     # Initialise matches dictionary.
     matches:dict = dict()
     matches.update({"games":[]})
-    matches.update({"teams":{}})
+    matches.update({"teams":[]})
     matches.update({"num_games": episode})
+
+    # Insert agents into log.
+    for i in range(len(agent_names)):
+        team_info:dict = dict()
+        team_info["agent"] = agent_names[i]
+        team_info["team_name"] = "TODO"
+        matches["teams"].append(team_info)
 
     while (current_time < finish_time and episode < max_episodes):
         # Create agents.
@@ -128,19 +136,13 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
             # TECH DEBT: Should I throw some kind of log from here?
             return False
         
+        # TODO: FIX GAME LOGGING TO HANDLE THE REVERSION.
         # Reverse the order of players halfway through training.
-        if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
-                or episode > ((MAX_EPISODES * 0.5)-1)):
-            # NOTE: Since we only have two players, we can just reverse
-            # the order of the list.
-            agent_list.reverse()
-
-        # Insert agents into log.
-        for i in range(len(agent_names)):
-            team_info:dict = dict()
-            team_info["agent"] = agent_names[i]
-            team_info["team_name"] = "TODO"
-            matches["teams"].update({i:team_info})
+        #if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
+        #        or episode > ((MAX_EPISODES * 0.5)-1)):
+        #    # NOTE: Since we only have two players, we can just reverse
+        #    # the order of the list.
+        #    agent_list.reverse()
 
 
         # Create game.
@@ -203,12 +205,149 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     return True
 
 
+def extract_board_positions(match_filename:str, out_filename:str) -> None:
+    """extract_board_positions
+    Returns a list of tuples that stores the black agent name, white
+    agent name, the randomly selected board position, and the winner of
+    the game.
+
+    Args:
+        filename (str): String detailing the file_name of the matches
+        training epoch summary.
+
+    Returns:
+        list[tuple]: _description_
+    """
+
+    with open(match_filename, "r") as m_file:
+        match:dict = json.load(m_file)
+
+    print(match)
+    black_agent:str = match["teams"][BLACK_ID]["agent"]
+    white_agent:str = match["teams"][WHITE_ID]["agent"]
+    header = ["black_agent_name", "white_agent_name", "board_vector",
+              "match_winner"]
+
+    # Open file.
+    csv_file = open(out_filename, "w")
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(header)
+
+    for m_game in match["games"]:
+        print(m_game)
+
+        with open("Results\\"+m_game["filename"]+".json", "r") as g_file:
+            game:dict = json.load(g_file)
+
+        # Select a random board position.
+        selected_pos_num = random.randrange(0, len(game["actions"]))
+        
+        # Simulate game to that board position.
+        bg_rules = BackgammonRules()
+        for turn in game["actions"]:
+            # Simulate the action.
+            assert(type(turn["action"]) is list)
+            for move in turn["action"]:
+                assert(type(move) is list)
+            bg_rules.update(turn["action"])
+
+            # Determine if this is the relevant board position.
+            if turn["turn"] == selected_pos_num:
+                # Generate vector representation.
+                selected_board_vector = td_gammon_vector(bg_rules.current_game_state)
+                # Determine who won.
+                if (bg_rules.current_agent_id == BLACK_ID
+                    and game["scores"][BLACK_ID]):
+                    won_game:int = 1
+                elif (bg_rules.current_agent_id == WHITE_ID
+                    and game["scores"][WHITE_ID]):
+                    won_game:int = 1
+                else:
+                    won_game:int = -1
+                
+                print(bg_rules.current_agent_id)
+                print(game["scores"])
+                break
+        # Store board position.
+        csv_writer.writerow([black_agent, white_agent, selected_board_vector, won_game])
+
+    # All positions have been extracted.
+    csv_file.close()
+    assert(csv_file.closed)
+
+    return None
+
+
+def td_gammon_vector(game_state:BackgammonState) -> list:
+    """td_gammon_vector
+    Turn a BackgammonState object into a vector representation used in
+    the TD-gammon technique outlined in Tesaruo's paper.
+
+    Reference List:
+        Tesauro, G. (1995). Temporal difference learning and TD-Gammon.
+        Communications of the ACM, 38(3), 58-68.
+
+    Args:
+        game_state (BackgammonState): BackgammonState s.
+
+    Returns:
+        list: Vector representation of game state.
+    """
+
+    # Determine agent vectors.
+    black_vector = []
+    white_vector = []
+    blank_vector = [0] * 4
+    for i in range(1, 24):
+        point = game_state.points_content[i]
+        if point > 0:
+            # Black owned point.
+            if point < 4:
+                point_vec = [1 for x in range(point)] + [0 for x in range(point-4)]
+            else:
+                point_vec = [1,1,1, ((point-3)/2)]
+
+            black_vector += point_vec
+            white_vector += blank_vector
+        elif point < 0:
+            # White owned point.
+            if point > -4:
+                point_vec = [1 for x in range(abs(point))] + [0 for x in range(abs(point)-4)]
+            else:
+                point_vec = [1,1,1, ((abs(point)-3)/2)]
+
+            white_vector += point_vec
+            black_vector += blank_vector
+        else:
+            # Empty point.
+            black_vector += blank_vector
+            white_vector += blank_vector
+    
+    vector:list = black_vector + white_vector
+    
+    # Pieces on bar.
+    vector.append((game_state.black_checkers_taken / 2))
+    vector.append((game_state.white_checkers_taken / 2))
+
+    # Pieces removed.
+    vector.append(abs(game_state.points_content[BLACK_HOME_POINT]) / 2)
+    vector.append(abs(game_state.points_content[WHITE_HOME_POINT]) / 2)
+
+    # Agents turn.
+    vector.append((1 if game_state.current_agent_id == BLACK_ID else 0))
+    vector.append((1 if game_state.current_agent_id == WHITE_ID else 0))
+
+    return vector
 
 # MAIN --------------------------------------------------------------- #
 
 if __name__ == "__main__":
     # Instantiate classes.
-    agent_names:list[str] = ["generic.random", "generic.random"]
-    train(agent_names, RESULTS_PATH, max_episodes=5)
+    random.seed(SEED)
+    #agent_names:list[str] = ["generic.random", "heuristic.running"]
+    #train(agent_names, RESULTS_PATH, max_episodes=5)
+
+    extract_board_positions("Results\\20240726-1055_matches.json",
+                            "Results\\20240726-1055_board_value.csv")
 
 # END ---------------------------------------------------------------- #
