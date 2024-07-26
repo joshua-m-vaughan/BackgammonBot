@@ -37,13 +37,15 @@ class MultiAgentNode():
     def __init__(self, mdp:MDP, parent, game_state:GameState,
                  qfunction:QFunction, bandit:Bandit, agent_id:int,
                  reward:list[float] =[float(0.0), float(0.0)],
-                 action:tuple = None) -> None:
+                 action:tuple = None,
+                 simulation_depth:int = SIMULATION_LIMIT) -> None:
         self.mdp:MDP = mdp
         self.parent = parent
         self.children:dict = defaultdict(lambda: [])
         self.game_state:GameState = game_state
         self.id:int = MultiAgentNode.next_node_id
         MultiAgentNode.next_node_id += 1
+        self.simulation_depth:int = simulation_depth
 
         # Q-function to store q-values.
         self.qfunction:QFunction = qfunction
@@ -129,7 +131,7 @@ class MultiAgentNode():
         next_agent_id = 1 if self.agent_id == 0 else 0
         new_child = MultiAgentNode(self.mdp, self, deepcopy(next_game_state),
                                    self.qfunction, self.bandit, next_agent_id,
-                                   reward, action)
+                                   reward, action, self.simulation_depth)
         # Add child node into parent's list of children.
         self.children[str(action)].append((new_child, action))
         return new_child
@@ -220,7 +222,7 @@ class MultiAgentNode():
         """
 
         if (not self.mdp.is_terminal_state(self.game_state, self.agent_id)
-            and depth < SIMULATION_LIMIT):
+            and depth < self.simulation_depth):
             # Select an action using heuristic.
             actions = self.mdp.get_actions(self.game_state, self.agent_id)
             action = self._heuristicSelect(actions, heuristic)
