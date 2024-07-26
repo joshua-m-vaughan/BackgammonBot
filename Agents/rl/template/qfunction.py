@@ -12,9 +12,15 @@ import random
 
 # CONSTANTS ---------------------------------------------------------- #
 
+LEARNING_RATE:float = 0.1
+
 # CLASS DEF ---------------------------------------------------------- #       
 
 class QFunction():
+
+    def __init__(self, alpha=LEARNING_RATE):
+        # Initialise Q-function.
+        self.alpha = alpha
     
     def get_q_value(self, game_game_state:GameState,
                     action:tuple) -> float:
@@ -48,7 +54,7 @@ class QFunction():
 
         # Identify actions with max Q-value.
         for action in actions:
-            tmp_q = self._getQValue(action, game_state)
+            tmp_q = self.get_q_value(action, game_state)
             if tmp_q > max_q:
                 max_q = tmp_q
         
@@ -71,7 +77,7 @@ class QFunction():
 
         # Identify actions with max Q-value.
         for action in actions:
-            tmp_q = self._getQValue(action, game_state)
+            tmp_q = self.get_q_value(action, game_state)
             if tmp_q > max_q:
                 max_q = tmp_q
                 max_actions = [action]
