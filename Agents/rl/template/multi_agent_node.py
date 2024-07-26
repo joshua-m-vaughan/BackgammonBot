@@ -14,6 +14,8 @@
 from collections import defaultdict
 from operator import add
 from copy import deepcopy
+from types import FunctionType
+import random
 
 from Agents.rl.template.bandit import Bandit
 from Agents.rl.template.mdp import MDP
@@ -133,7 +135,7 @@ class MultiAgentNode():
         self.children[str(action)].append((new_child, action))
         return new_child
 
-    def expand(self):
+    def expand(self, heuristic:FunctionType):
         """Expand a multi-agent node, on the basis that it has not been
         expanded yet using Miller's (2023) approach.
 
@@ -147,21 +149,34 @@ class MultiAgentNode():
         if not self.mdp.is_terminal_state(self.game_state, self.agent_id):
             # Select next action to expand.
             actions = self.mdp.get_actions(self.game_state, self.agent_id)
-            action = self._heuristicSelect(actions)
+            action = self._heuristicSelect(actions, heuristic)
             self.children[str(action)] = []
             return self.get_outcome_child(action)
         else:
             # In terminal game_state: no further to expand.
             return self
 
-    def _heuristicSelect(self, actions):
+    def _heuristicSelect(self, actions, heuristic:FunctionType):
         """Select next action using a heuristic.
 
         Returns:
             Action: Action a.
         """
-        utils.raiseNotDefined()
-        return 0
+        # Initialise min variables.
+        min_h = float("inf")
+        min_actions = None
+
+        # Identify actions with max Q-value.
+        for action in actions:
+            tmp_h = heuristic(self.game_state, action)
+            if tmp_h < min_h:
+                min_h = min_h
+                min_actions = [action]
+            elif tmp_h == min_h:
+                min_actions.append(action)
+
+        # Random tie-break of tied max values.
+        return random.choice(min_actions)
 
     def backpropogate(self, reward, child):
         """Backpropogate the reward from the terminal game_state back to the
@@ -189,7 +204,7 @@ class MultiAgentNode():
             self.parent.backpropogate(tuple(map(add, self.reward, reward)),
                                       self)
     
-    def simulate(self, cum_reward, depth):
+    def simulate(self, cum_reward, depth, heuristic:FunctionType):
         """ Simulate a game from a node to a terminal game_state
         using Miller's (2023) approach that stores subsequent search nodes.
     
@@ -209,7 +224,7 @@ class MultiAgentNode():
             and sum(depth) < SIMULATION_LIMIT):
             # Select an action using heuristic.
             actions = self.mdp.get_actions(self.game_state, self.agent_id)
-            action = self._heuristicSelect(actions)
+            action = self._heuristicSelect(actions, heuristic)
             # Execute the action, and get the child node.
             child = self.get_outcome_child(action)
 
