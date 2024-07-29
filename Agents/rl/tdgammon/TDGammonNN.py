@@ -28,20 +28,21 @@ NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
 
 # CLASS DEF ---------------------------------------------------------- #      
 
-class NNQFunction(QFunction):
+class TDGammonNNQFunction(QFunction):
 
-    def __init__(self, alpha = TD_ALPHA) -> None:
+    def __init__(self, hidden_features:int = NUM_TDGAMMON1_HIDDEN,
+                 alpha:float = TD_ALPHA) -> None:
         
         super().__init__(alpha)
-        self.nn: TDGammonNN = None # TODO: Finish this implementation.
+        self.nn:TDGammonNN = TDGammonNN(hidden_features)
         
-    def get_q_value(self, game_game_state:GameState,
+    def get_q_value(self, game_state:GameState,
                     action:tuple) -> float:
         """ get_q_value
         Return Q-value for action,game_state pair.
 
         Args:
-            game_game_state (GameState): State s
+            game_state (GameState): State s
             action (Action): Action a
         
         Returns:
