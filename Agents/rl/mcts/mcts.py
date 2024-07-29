@@ -13,7 +13,7 @@ from Agents.rl.template.mdp import MDP
 from Agents.rl.template.qfunction import QFunction
 from ExtendedFormGame import utils
 from ExtendedFormGame.template import Agent, GameRules, GameState
-from Agents.rl.template.multi_agent_node import MultiAgentNode
+from Agents.rl.mcts.multi_agent_node import MultiAgentNode
 
 # CONSTANTS ---------------------------------------------------------- #
 
