@@ -17,18 +17,17 @@ from backgammon_model import BackgammonRules, BackgammonState
 
 # CONSTANTS ---------------------------------------------------------- #
 
+TD_GAMMA:float = 1.0 # As defined in Tesauro paper.
+
 # CLASS DEF ---------------------------------------------------------- #      
 
 class TDGammonMDP(MDP):
 
     def __init__(self, qfunction:QFunction,
                  game_rules:BackgammonRules,
-                 gamma = None) -> None:
+                 gamma:float = TD_GAMMA) -> None:
         
-        if gamma is None:
-            super().__init__(qfunction, game_rules)
-        else:
-            super().__init__(qfunction, game_rules, float(gamma))
+        super().__init__(qfunction, game_rules, float(gamma))
 
     def get_reward(self, game_state:BackgammonState,
                    game_state_p:BackgammonState,
