@@ -64,7 +64,8 @@ class OffPolicyTDAgent(Agent):
                                                      self.id)
             
             # Update Q-function using off-policy approach.
-            # TODO: WORK OUT HOW THIS SHOULD WORK ACROSS IMPLEMENTATIONS.
+            self.qfunction.update(self.last_state, game_state, actions,
+                                  reward, self.mdp.gamma, self.id)
 
         # Update state, action storage for learning.
         self.last_action = deepcopy(action)
