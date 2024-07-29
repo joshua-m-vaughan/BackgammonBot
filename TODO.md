@@ -14,3 +14,4 @@
 - [X] Fix unable to play move when largest is unplayable - if this generates nothing, then skip to smallest one.
     - TECH DEBT: This has been addressed by implementing a reverse order validation, which breaks the largest face first rule that prevents players from not playing a move when they can. 
 - [X] Fix tied endings, and why it is possible to have this occur.
+- [ ] Refactor lists and most datastructures in Numpy objects - to facilitate integration with PyTorch.
