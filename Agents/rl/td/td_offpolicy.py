@@ -75,4 +75,24 @@ class OffPolicyTDAgent(Agent):
 
         return action      
 
+    # I/O Helpers ---------------------------------------------------- #
+    def update_endgame_weights(self, history:dict) -> None:
+        """update_endstate_weights
+        Updates the weights using the history printout for the match to
+        accurately capture rewards at endgame state.
+
+        Args:
+            history (dict): Dictionary storing winning results and the
+            history for the game.
+        """
+        # Do nothing - not a learning-based approach.
+        return None
+    
+    def save_weights(self) -> None:
+        """save_weights
+        Save training weights for learning-based agents.
+        """
+        # Do nothing - not a learning-based approach.
+        return None
+
 # END ---------------------------------------------------------------- #
