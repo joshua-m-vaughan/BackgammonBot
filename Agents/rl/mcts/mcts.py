@@ -2,25 +2,18 @@
 
 # Author:  Josh Vaughan, leveraging the extended form game framework
 #          from COMP90054 Assignment 3.
-# Date:    22/07/2024
-# Purpose: Implements an agent for Backgammon using the TD-Gammon 3.0
-#          approach outlined by Tesauro's paper.
-
-# Reference List:
-#   Tesauro, G. (1995). Temporal difference learning and TD-Gammon.
-#   Communications of the ACM, 38(3), 58-68.
+# Date:    29/07/2024
+# Purpose: Implements an agent that uses MCTS learning.
 
 # IMPORTS ------------------------------------------------------------ #
 
-from copy import deepcopy
 from datetime import datetime, timedelta
-
-from Agents.rl.template.bandit import UCT, Bandit
+from Agents.rl.template.bandit import Bandit
 from Agents.rl.template.mdp import MDP
-from Agents.rl.template.multi_agent_node import MultiAgentNode
 from Agents.rl.template.qfunction import QFunction
-from ExtendedFormGame.template import Agent
-from backgammon_model import BackgammonRules, BackgammonState
+from ExtendedFormGame import utils
+from ExtendedFormGame.template import Agent, GameRules, GameState
+from Agents.rl.template.multi_agent_node import MultiAgentNode
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -31,21 +24,22 @@ SIMULATION_DEPTH:int = int(3)
 
 # CLASS DEF ---------------------------------------------------------- #  
 
-class myAgent(Agent):
-    def __init__(self,_id: int) -> None:
+class MCTSAgent(Agent):
+    def __init__(self,_id: int, qfunction:QFunction,
+                 game_rules:GameRules, mdp:MDP, bandit:Bandit) -> None:
         super().__init__(_id)
-        self.game_rules:BackgammonRules = BackgammonRules() # TECH DEBT: Include this in agent specification.
+        self.game_rules:GameRules = game_rules
     
         # Define data structures to support MCTS.
-        self.qfunction:QFunction = QFunction() # TODO: IMPLEMENT
+        self.qfunction:QFunction = qfunction
+        self.mdp:MDP = mdp
+        self.bandit:Bandit = bandit
         self.turn:int = 0
-        self.mdp:MDP = MDP(self.qfunction, self.game_rules) # TODO: IMPLEMENT
-        self.bandit:Bandit = UCT(_id, self.qfunction)
         self.root_node:MultiAgentNode = None
         self.simulation_limit:int = SIMULATION_DEPTH
 
 
-    def select_action(self, game_state:BackgammonState,
+    def select_action(self, game_state:GameState,
                       actions:list[tuple]) -> tuple:
         """select_action
         Given a set of available actions for the agent to execute, and
@@ -60,7 +54,7 @@ class myAgent(Agent):
             Action: Selected action instance.
         """
 
-        start = datetime.now()
+        start:datetime = datetime.now()
 
         print("TURN "+str(self.turn)+" AGENT "+str(self.id))
 
@@ -79,7 +73,7 @@ class myAgent(Agent):
 
         # Select next best action.
         timer_s = datetime.now()
-        action = self.qfunction._getArgMax(actions, game_state)
+        action = self.qfunction.get_arg_max(game_state, actions)
         timer_f = datetime.now()
         print("ACTION SELECTION DURATION: "+str(timer_f - timer_s))
         print()
@@ -90,7 +84,7 @@ class myAgent(Agent):
 
         return action
     
-    def heuristic(self, game_state:BackgammonState,
+    def heuristic(self, game_state:GameState,
                   action:tuple) -> float:
         """heuristic
         Return heuristic value for applying action a in game state s.
@@ -104,16 +98,11 @@ class myAgent(Agent):
         Returns:
             float: heuristic value
         """
-        tmp_game_state = deepcopy(game_state)
-        game_state_prime = self.game_rules.generate_successor(tmp_game_state,
-                                                              action,
-                                                              self.id)
-        heuristic:float = (self.game_rules.calculate_score(game_state_prime, self.id)
-                           - self.game_rules.calculate_score(game_state, self.id))
-        return heuristic
+        utils.raiseNotDefined
+        return 0
 
     # MCTS ----------------------------------------------------------- #
-    def _mcts(self, fin_time:datetime, game_state:BackgammonState):
+    def _mcts(self, fin_time:datetime, game_state:GameState):
         """Execute the MCTS algorithm from the given initial state until
         the finish time is reached using Miller's (2023) approach.
     
@@ -144,7 +133,7 @@ class myAgent(Agent):
             
             cur_time = datetime.now()
     
-    def _createRootNode(self, state):
+    def _createRootNode(self, game_state:GameState):
         """Create root node for MCTS.
         Args:
             state (GameState): State s.
@@ -152,7 +141,9 @@ class myAgent(Agent):
         Returns:
             MultiAgentNode: Root node.
         """
-        return MultiAgentNode(mdp=self.mdp, parent=None, state=state,
+        return MultiAgentNode(mdp=self.mdp,
+                              parent=None,
+                              state=game_state,
                               qfunction=self.qfunction,
                               bandit=self.bandit, agent_id=self.id, 
                               simulation_depth=self.simulation_limit)
