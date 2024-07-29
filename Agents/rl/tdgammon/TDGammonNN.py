@@ -21,19 +21,18 @@ from ExtendedFormGame.template import GameState
 
 # CONSTANTS ---------------------------------------------------------- #
 
+TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
+NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
+NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
+NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
+
 # CLASS DEF ---------------------------------------------------------- #      
 
 class NNQFunction(QFunction):
 
-    def __init__(self, alpha = None) -> None:
+    def __init__(self, alpha = TD_ALPHA) -> None:
         
-        # Create super class.
-        if alpha is None:
-            super().__init__()
-        else:
-            super().__init__(alpha)
-        
-        # Initialise subclass attributes.
+        super().__init__(alpha)
         self.nn: TDGammonNN = None # TODO: Finish this implementation.
         
     def get_q_value(self, game_game_state:GameState,
@@ -88,7 +87,40 @@ class NNQFunction(QFunction):
         utils.raiseNotDefined()
         return 0
 
-class TDGammonNN(torch.nn):
-    pass
+class TDGammonNN(nn.Module):
+    
+    def __init__(self, num_hidden_units:int = NUM_TDGAMMON1_HIDDEN):
+        super().__init__()
+
+        # Define our hidden layer.
+        self.hidden = nn.Sequential(
+            nn.Linear(in_features=NUM_TDGAMMON_FEATURES,
+                      out_features=num_hidden_units),
+            nn.Sigmoid()
+        )
+
+        # Define the output layer.
+        self.output = nn.Sequential(
+            nn.Linear(in_features=num_hidden_units,
+                      out_features=NUM_TDGAMMON_OUTPUT),
+            nn.Sigmoid()
+        )
+
+        # Initialise weights to zero.
+        for p in self.parameters():
+            nn.init.zeros_(p)
+    
+    # NOTE: Overriding method.
+    def forward(self, x):
+        """forward
+        Model inference.
+
+        Args:
+            x (list[float]): A list of floats.
+        """
+        x = torch.from_numpy(np.array(x))
+        x = self.hidden(x)
+        x = self.output(x)
+        return x
 
 # END FILE ----------------------------------------------------------- #
