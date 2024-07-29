@@ -11,6 +11,7 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+from copy import deepcopy
 import numpy as np
 import torch
 import torch.nn as nn
@@ -22,6 +23,7 @@ from ExtendedFormGame.template import GameState
 # CONSTANTS ---------------------------------------------------------- #
 
 TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
+TD_LAMDA:float = 0.01 # TO DETERMINE WHAT THIS IS.
 NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
@@ -30,11 +32,13 @@ NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
 
 class TDGammonNNQFunction(QFunction):
 
-    def __init__(self, hidden_features:int = NUM_TDGAMMON1_HIDDEN,
-                 alpha:float = TD_ALPHA) -> None:
+    def __init__(self,
+                 hidden_features:int = NUM_TDGAMMON1_HIDDEN,
+                 alpha:float = TD_ALPHA,
+                 lamda:float = TD_LAMDA) -> None:
         
         super().__init__(alpha)
-        self.nn:TDGammonNN = TDGammonNN(hidden_features)
+        self.nn:TDGammonNN = TDGammonNN(hidden_features, lamda)
         
     def get_q_value(self, game_state:GameState,
                     action:tuple) -> float:
@@ -89,8 +93,18 @@ class TDGammonNNQFunction(QFunction):
         return 0
 
 class TDGammonNN(nn.Module):
+    """TDGammonNN
+    Implement a Neural Network class using PyTorch for TD-Gammon using
+    the approach outlined by dellalibera on GitHub.
+
+    Reference List:
+        Della Libera A., td-gammon, (2019), Github repository,
+        https://github.com/dellalibera/td-gammon
+    """
     
-    def __init__(self, num_hidden_units:int = NUM_TDGAMMON1_HIDDEN):
+    def __init__(self,
+                 num_hidden_units:int = NUM_TDGAMMON1_HIDDEN, 
+                 lamda:float = TD_LAMDA):
         super().__init__()
 
         # Define our hidden layer.
@@ -110,6 +124,10 @@ class TDGammonNN(nn.Module):
         # Initialise weights to zero.
         for p in self.parameters():
             nn.init.zeros_(p)
+
+        # Initialise eligbility traces.
+        self.lamda:float = lamda
+        self.eligibility_traces:list = [torch.zeros(weights.shape, requires_grad=False) for weights in list(self.parameters())]
     
     # NOTE: Overriding method.
     def forward(self, x):
@@ -123,5 +141,40 @@ class TDGammonNN(nn.Module):
         x = self.hidden(x)
         x = self.output(x)
         return x
+    
+    def update_weights(self, output:torch.Tensor,
+                       alpha:float,
+                       gamma:float,
+                       delta:float) -> None:
+        """update_weights
+        Update the weights of the model.
+
+        Args:
+            output (torch.Tensor): Output from training inference.
+            alpha (float): Alpha value.
+            gamma (float): Gamma value.
+            delta (float): Delta value.
+        """
+        # Reset gradients.
+        self.zero_grad()
+
+        # Compute the derivative of the output w.r.t. the parameters.
+        output.backward()
+
+        with torch.no_grad():
+            # Get parameters of the model.
+            parameters = list(self.parameters())
+
+            for i, weights in parameters:
+                # Compute eligbility traces:
+                # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
+                self.eligibility_traces[i] = ((gamma * self.lamda * self.eligibility_traces[i])
+                                              + weights.grad)
+
+                # Parameter Update:
+                # theta <- theta + (alpha * delta * gradient of Q-function)
+                new_weights = (weights +
+                               (alpha * delta * self.eligibility_traces[i]))
+                weights = deepcopy(new_weights)
 
 # END FILE ----------------------------------------------------------- #
