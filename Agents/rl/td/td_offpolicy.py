@@ -13,6 +13,7 @@ import random
 from Agents.rl.template.bandit import Bandit
 from Agents.rl.template.mdp import MDP
 from Agents.rl.template.qfunction import QFunction
+from ExtendedFormGame import utils
 from ExtendedFormGame.template import Agent, GameRules, GameState
 
 # CONSTANTS ---------------------------------------------------------- #
@@ -86,14 +87,14 @@ class OffPolicyTDAgent(Agent):
             history (dict): Dictionary storing winning results and the
             history for the game.
         """
-        # Do nothing - not a learning-based approach.
-        return None
+        utils.raiseNotDefined
+        return 0
     
     def save_weights(self) -> None:
         """save_weights
         Save training weights for learning-based agents.
         """
-        # Do nothing - not a learning-based approach.
-        return None
+        utils.raiseNotDefined
+        return 0
 
 # END ---------------------------------------------------------------- #
