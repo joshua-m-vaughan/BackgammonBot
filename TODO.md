@@ -8,7 +8,7 @@
     - [X] TD Gammon 0.0 requires onpolicy learning: this will unlikely be able to use PyTorch due to the specific gradient descent method.
     - [ ] TD Gammon 3.0: use MCTS for a 3-depth search into the 
     - [ ] Compare performance of the performance of these two models.
-- [ ] Create an evaluation script for agent.
+- [X] Create an evaluation script for agent.
 - [ ] Implement novel self-guided implementation for agent and train.
     - [ ] Alpha Go approach: Take the TD Gammon 3.0 trained network and then use self-play to generate a many games, then implement a different NN to learn the valuation of different positions, to see if we can achieve an improved performance.
 - [X] Fix unable to play move when largest is unplayable - if this generates nothing, then skip to smallest one.
