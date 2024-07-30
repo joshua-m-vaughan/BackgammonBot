@@ -15,8 +15,9 @@ from ExtendedFormGame.template import Agent, GameRules, GameState
 
 # CONSTANTS ---------------------------------------------------------- #
 
-WARMUP = 10 # Warm-up period for each agent on their first turn.
-WINNING_PIP_VALUE = 0
+WARMUP:int = 100000 # Warm-up period for each agent on their first turn.
+TIME_LIMIT:int = 100000
+WINNING_PIP_VALUE:int = 0
 
 # CLASS DEF ---------------------------------------------------------- #
 
@@ -24,7 +25,7 @@ class Game():
 
     def __init__(self, game_rules:GameRules, agent_list:Agent,
                  agent_names:list[str], num_agents:int,
-                 seed:int = 1, time_limit:int = 1,
+                 seed:int = 1, time_limit:int = TIME_LIMIT,
                  warning_limit:int = 3) -> None:
         """__init__
         Initialise an instance of Game class.
