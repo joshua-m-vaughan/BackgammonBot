@@ -88,8 +88,10 @@ class TDGammonNNQFunction(QFunction):
             filename (str): String describing filepath and filename
             to save Q-function to.
         """
-        utils.raiseNotDefined()
-        return 0
+        torch.save({"model_state_dict":self.nn.state_dict,
+                    "eligbility": self.nn.eligibility_traces if self.nn.eligibility_traces else []},
+                    f=filename)
+        print("Model saved")
     
     def load_policy(self, filename:str) -> None:
         """Load a policy from a specific filename.
@@ -98,8 +100,9 @@ class TDGammonNNQFunction(QFunction):
             filename (str): String describing filepath and filename
             to save Q-function to.
         """
-        utils.raiseNotDefined()
-        return 0
+        checkpoint = torch.load(filename)
+        self.nn.load_state_dict(checkpoint["model_state_dict"])
+        self.nn.eligibility_traces = checkpoint["eligbility"]
 
 class TDGammonNN(nn.Module):
     """TDGammonNN
