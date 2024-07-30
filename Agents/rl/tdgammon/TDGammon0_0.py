@@ -3,7 +3,7 @@
 # Author:  Josh Vaughan, leveraging the extended form game framework
 #          from COMP90054 Assignment 3.
 # Date:    29/07/2024
-# Purpose: Implements an agent for Backgammon using the TD-Gammon 1.0
+# Purpose: Implements an agent for Backgammon using the TD-Gammon 0.0
 #          approach outlined by Tesauro's paper.
 
 # Reference List:

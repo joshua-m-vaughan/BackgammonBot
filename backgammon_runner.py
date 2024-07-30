@@ -302,7 +302,7 @@ def time_print(s:str):
 if __name__ == "__main__":
     # Instantiate classes.
     random.seed(SEED)
-    agent_names:list[str] = ["rl.tdgammon.TDGammon1_0", "rl.tdgammon.TDGammon1_0"]
-    train(agent_names, RESULTS_PATH, "tdgammon1_0_selfplay", max_episodes=5)
+    agent_names:list[str] = ["rl.tdgammon.TDGammon0_0", "rl.tdgammon.TDGammon0_0"]
+    train(agent_names, RESULTS_PATH, "tdgammon0_0_selfplay", max_episodes=5)
 
 # END ---------------------------------------------------------------- #
