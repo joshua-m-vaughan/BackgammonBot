@@ -8,7 +8,6 @@
 # IMPORTS ------------------------------------------------------------------------------------------------------------#
 
 from copy import deepcopy
-from math import inf
 from ExtendedFormGame.template import Agent, GameRules, GameState
 import random
 
