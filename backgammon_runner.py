@@ -135,12 +135,14 @@ def train(agent_path:list[str], agent_names:list[str],
     wins:list[int] = [0] * len(agent_path)
     ties:list[int] = [0] * len(agent_path)
     losses:list[int] = [0] * len(agent_path)
+    random.seed(seed)
 
     # Initialise matches dictionary.
     matches:dict = dict()
     matches.update({"games":[]})
     matches.update({"teams":[]})
     matches.update({"num_games": episode})
+    matches.update({"seed":seed})
 
     # Insert agents into log.
     for i in range(len(agent_path)):
@@ -176,9 +178,10 @@ def train(agent_path:list[str], agent_names:list[str],
         #        or episode > ((BASE_EPISODES * 0.5)-1)):
 
         # Create game.
+        tmp_seed:float = random.randint()
         bg_rules = BackgammonRules()
         bg_game = Game(bg_rules, agent_list, agent_path, num_agents,
-                       seed)
+                       tmp_seed)
         
         # Run game.
         history = bg_game.run()
@@ -206,7 +209,7 @@ def train(agent_path:list[str], agent_names:list[str],
                 game.update({"valid_game":False})
                 break
         game.update({"filename":file_time + "_" + training_name + "_" + str(episode)})
-        game.update({"random_seed":seed})
+        game.update({"random_seed":tmp_seed})
         game.update({"scores":history["scores"]})
         game.update({"training_time":str(elapsed)})
         matches["games"].append(game)
@@ -277,12 +280,14 @@ def eval(agent_path:list[str], agent_names:list[str],
     wins:list[int] = [0] * len(model_path)
     ties:list[int] = [0] * len(model_path)
     losses:list[int] = [0] * len(model_path)
+    random.seed(seed)
 
     # Initialise matches dictionary.
     matches:dict = dict()
     matches.update({"games":[]})
     matches.update({"teams":[]})
     matches.update({"num_games": episode})
+    matches.update({"seed":seed})
 
     # Insert agents into log.
     for i in range(len(agent_path)):
@@ -321,9 +326,10 @@ def eval(agent_path:list[str], agent_names:list[str],
         #        or episode > ((BASE_EPISODES * 0.5)-1)):
 
         # Create game.
+        tmp_seed:float = random.random()
         bg_rules = BackgammonRules()
         bg_game = Game(bg_rules, agent_list, agent_path, num_agents,
-                       seed)
+                       tmp_seed)
         
         # Run game.
         history = bg_game.run()
@@ -349,7 +355,7 @@ def eval(agent_path:list[str], agent_names:list[str],
                 game.update({"valid_game":False})
                 break
         game.update({"filename":file_time + "_" + eval_name + "_" + str(episode)})
-        game.update({"random_seed":seed})
+        game.update({"random_seed":tmp_seed})
         game.update({"scores":history["scores"]})
         game.update({"training_time":str(elapsed)})
         matches["games"].append(game)
