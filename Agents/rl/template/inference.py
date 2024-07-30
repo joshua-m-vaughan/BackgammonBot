@@ -18,7 +18,7 @@ SUBSEQUENT_TURN_TIME:float = float(1.0)
 
 # CLASS DEF ---------------------------------------------------------- #  
 
-class OffPolicyTDAgent(Agent):
+class myAgent(Agent):
     def __init__(self,_id: int, qfunction:QFunction) -> None:
         super().__init__(_id)
     

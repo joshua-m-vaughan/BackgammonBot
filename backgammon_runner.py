@@ -14,6 +14,7 @@ from importlib import import_module
 from pathlib import Path
 import json
 from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
+from Agents.rl.template.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
 from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
 from ExtendedFormGame.Game import Game
@@ -52,6 +53,7 @@ def load_parameters():
     # Agents.
     parser.add_argument('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="generic.random,generic.random", dest="agents")
     parser.add_argument('--agent_names', help='A list of agent names', default="random0,random1", dest="agent_names") 
+    parser.add_argument("-m", "--models", help="A list of paths to agent models.", dest="models")
 
     # Game settings.
     parser.add_argument('-w', '--warningTimeLimit', type=float,help='Time limit for a warning of one move in seconds (default: 1)', default=1.0, dest="wtl")
@@ -242,6 +244,137 @@ def train(agent_path:list[str], agent_names:list[str],
     time_print("Training Complete.")
     return True
 
+def eval(model_path:list[str], agent_names:list[str],
+         results_path: str, eval_name:str, seed:int = SEED,
+         max_episodes:int = BASE_EPISODES,
+         max_duration:int = BASE_DURATION) -> bool:
+    """eval
+    A script to control the evaluation of an agent playing backgammon.
+
+    Args:
+        model_path(list[str]): A list of model paths for evaluation.
+        agents (list[str]): A list of agents names in the evaluation.
+        results_path (str): String detailing path to store evaluation results.
+        eval_name(str): String providing context to evaluation example.
+        seed(int): Integer for random seed.
+        max_episodes (int, optional): Number of episodes to evaluate for.
+        Defaults to BASE_EPISODES.
+        max_duration (int, optional): Duration to evaluate for. Defaults
+        to BASE_DURATION.
+
+    Returns:
+        bool: Success indicator of evaluation.
+    """
+    # Initialise training parameters.
+    episode:int = 0
+    current_time:datetime = datetime.now()
+    finish_time:datetime = current_time + timedelta(hours=max_duration)
+    file_time:datetime = current_time.strftime("%Y%m%d-%H%M")
+    wins:list[int] = [0] * len(model_path)
+    ties:list[int] = [0] * len(model_path)
+    losses:list[int] = [0] * len(model_path)
+
+    # Initialise matches dictionary.
+    matches:dict = dict()
+    matches.update({"games":[]})
+    matches.update({"teams":[]})
+    matches.update({"num_games": episode})
+
+    # Insert agents into log.
+    for i in range(len(model_path)):
+        team_info:dict = dict()
+        team_info["agent"] = model_path[i]
+        team_info["team_name"] = agent_names[i]
+        matches["teams"].append(team_info)
+
+    # Create agents.
+    time_print("Creating agents...")
+    assert(len(model_path) == 2)
+    num_agents = 2
+    agent_path:list[str] = ["rl.template.inference", "rl.template.inference"]
+    (agent_list, valid_game) = load_agent(agent_path)
+    # Invalid agent loading.
+    if not valid_game:
+        # TECH DEBT: Should I throw some kind of log from here?
+        return False
+    
+    # Load models for evaluation.
+    for i in range(num_agents):
+        assert(type(agent_list[i]) is InferenceAgent)
+        agent_list[i].qfunction.load_policy(model_path[i])
+
+    while (current_time < finish_time and episode < max_episodes):
+        time_print(f"Starting episode {episode}...")
+        start:datetime = datetime.now()
+        
+        # TODO: FIX GAME LOGGING TO HANDLE THE REVERSION.
+        # Reverse the order of players halfway through training.
+        #if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
+        #        or episode > ((BASE_EPISODES * 0.5)-1)):
+
+        # Create game.
+        bg_rules = BackgammonRules()
+        bg_game = Game(bg_rules, agent_list, agent_path, num_agents,
+                       seed)
+        
+        # Run game.
+        history = bg_game.run()
+
+        # Store the results.
+        elapsed:datetime = datetime.now() - start
+        time_print(f"Elapsed episode time {elapsed}")
+        time_print("Checkpointing results...\n")
+
+        
+        # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
+        file_str = results_path + file_time + "_" + eval_name + "_" + str(episode) + ".json"
+        filename = Path(file_str)
+        with open(filename, "w") as file:
+            serialised = {str(key): value for key, value in history.items()}
+            json.dump(serialised, file, indent=JSON_INDENT)
+        
+        # Store training-level results.
+        game:dict = dict()
+        game.update({"valid_game":True})
+        for score in history["scores"]:
+            if score < 0:
+                game.update({"valid_game":False})
+                break
+        game.update({"filename":file_time + "_" + eval_name + "_" + str(episode)})
+        game.update({"random_seed":seed})
+        game.update({"scores":history["scores"]})
+        game.update({"training_time":str(elapsed)})
+        matches["games"].append(game)
+        matches.update({"num_games": episode})
+
+        for i in range(len(agent_path)):
+            if (history["scores"][i] == 1):
+                wins[i] += 1
+            else:
+                losses[i] += 1
+
+        # Increment training variables.
+        episode += 1
+        current_time = datetime.now()
+    
+    time_print("Saving epoch results...")
+
+    # Write training overview details.
+    # e.g. elapsed episode time, number of games, agent names.
+    matches.update({"wins":wins})
+    matches.update({"ties":ties})
+    matches.update({"losses":losses})
+    matches.update({"win_percentage":[w/episode for w in wins]})
+    matches.update({"succ":True})
+
+    file_str = results_path + file_time + "_" + eval_name + "_matches.json"
+    match_filename = Path(file_str)
+    with open(match_filename, "w") as file:
+        serialised = {str(key): value for key, value in matches.items()}
+        json.dump(serialised, file, indent=JSON_INDENT)
+
+    time_print("Evaluation Complete.")
+    return True
 
 def extract_board_positions(match_filename:str, out_filename:str) -> None:
     """extract_board_positions
