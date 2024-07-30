@@ -28,7 +28,7 @@ SEED:int = 42 # The meaning of life!
 BASE_EPISODES:int = 5 # Number of training episodes.
 BASE_DURATION:int = 1 # Duration of training in hours.
 AGENTS_PATH:str = "Agents."
-RESULTS_PATH:str = "Results\\"
+RESULTS_PATH:str = "results\\train\\"
 JSON_INDENT:int = 4 # One tab
 
 # FUNC DEF ----------------------------------------------------------- #
@@ -102,16 +102,19 @@ def load_agent(agent_path:list,
 
     return (agent_list, valid_game)
 
-def train(agent_path:list, agent_names:list, results_path: str,
-          training_name:str, seed:int = SEED,
+def train(agent_path:list[str], agent_names:list[str],
+          results_path: str, training_name:str, seed:int = SEED,
           max_episodes:int = BASE_EPISODES,
           max_duration:int = BASE_DURATION) -> bool:
     """train
     A script to control the training of a agent playing backgammon.
 
     Args:
-        agents (list): A list of agents to be used for training.
+        agent_path(list[str]): A list of agent paths for training.
+        agents (list[str]): A list of agents names in the training.
         results_path (str): String detailing path to store training results.
+        training_name(str): String providing context to training example.
+        seed(int): Integer for random seed.
         max_episodes (int, optional): Number of episodes to train for.
         Defaults to BASE_EPISODES.
         max_duration (int, optional): Duration to train for. Defaults
