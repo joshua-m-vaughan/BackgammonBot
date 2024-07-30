@@ -43,18 +43,18 @@ def load_parameters():
                                      description="Manages the training, evaluation, and testing pipeline for backgammon simulation.")
     
     # Training/Evaluation.
-    parser.add_argument("-t", "--train", action='store_true', help="Boolean indicator of whether performing training. (default: False)", default=False)
-    parser.add_argument("-e", "--eval", action='store_true', help="Boolean indicator of whether performing evaluation. (default: False)", default=False)
+    parser.add_argument("-t", "--train", action='store_true', help="Boolean indicator of whether performing training. (default: False)", default=False, dest="train")
+    parser.add_argument("-e", "--eval", action='store_true', help="Boolean indicator of whether performing evaluation. (default: False)", default=False, dest="eval")
     
     # Agents.
-    parser.add_argument('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="generic.random,generic.random")
-    parser.add_argument('--agent_names', help='A list of agent names', default="random0,random1") 
-    parser.add_argument('-n', '--num_of_agents', type='int', help='The number of agents in this game', default=2)
+    parser.add_argument('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="generic.random,generic.random", dest="agents")
+    parser.add_argument('--agent_names', help='A list of agent names', default="random0,random1", dest="agent_names") 
+    parser.add_argument('-n', '--num_agents', type='int', help='The number of agents in this game', default=2, dest="num_agents")
     
     # Game settings.
-    parser.add_argument('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0)
-    parser.add_argument('--numOfWarnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3)
-    parser.add_argument('--setRandomSeed', type='int',help='Set the random seed, otherwise it will be completely random (default: 90054)', default=90054)
+    parser.add_argument('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0, dest="wtl")
+    parser.add_argument('--num_warnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3, dest="num_warnings")
+    parser.add_argument('--set_seed', type='int',help='Set the random seed, otherwise it will be completely random (default: 42)', default=SEED, dest="set_seed")
 
     # Read args from command line
     return parser.parse_args(sys.argv[1:])
@@ -315,5 +315,10 @@ if __name__ == "__main__":
     random.seed(SEED)
     agent_names:list[str] = ["rl.tdgammon.TDGammon0_0", "rl.tdgammon.TDGammon0_0"]
     train(agent_names, RESULTS_PATH, "tdgammon0_0_selfplay", max_episodes=5)
+    exit()
+    options = loadParameter()
+    time_print(str(options))
+
+    if options.--
 
 # END ---------------------------------------------------------------- #
