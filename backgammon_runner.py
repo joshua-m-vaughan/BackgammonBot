@@ -42,8 +42,19 @@ def load_parameters():
     parser = argparse.ArgumentParser(prog="backgammon_runner",
                                      description="Manages the training, evaluation, and testing pipeline for backgammon simulation.")
     
-    # Define arguments for each step in the pipeline.
-    ## TODO: Implement.
+    # Training/Evaluation.
+    parser.add_argument("-t", "--train", action='store_true', help="Boolean indicator of whether performing training. (default: False)", default=False)
+    parser.add_argument("-e", "--eval", action='store_true', help="Boolean indicator of whether performing evaluation. (default: False)", default=False)
+    
+    # Agents.
+    parser.add_argument('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="generic.random,generic.random")
+    parser.add_argument('--agent_names', help='A list of agent names', default="random0,random1") 
+    parser.add_argument('-n', '--num_of_agents', type='int', help='The number of agents in this game', default=2)
+    
+    # Game settings.
+    parser.add_argument('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0)
+    parser.add_argument('--numOfWarnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3)
+    parser.add_argument('--setRandomSeed', type='int',help='Set the random seed, otherwise it will be completely random (default: 90054)', default=90054)
 
     # Read args from command line
     return parser.parse_args(sys.argv[1:])
