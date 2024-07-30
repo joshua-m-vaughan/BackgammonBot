@@ -1,7 +1,7 @@
 # INFORMATION -------------------------------------------------------- #
 
 # Author:  Josh Vaughan
-# Date:    13/07/2024
+# Date:    XX/07/2024
 # Purpose: Running script to manage training, evaluating, and testing
 #          pipelines for backgammon simulation.
 
@@ -89,7 +89,8 @@ def load_agent(agent_names:list,
 
     return (agent_list, valid_game)
 
-def train(agent_names:list, results_path: str, seed:int = SEED,
+def train(agent_names:list, results_path: str,
+          training_name:str, seed:int = SEED,
           max_episodes:int = MAX_EPISODES,
           max_duration:int = MAX_DURATION) -> bool:
     """train
@@ -140,7 +141,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
             # Both agents reference the same Q-Function.
             agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
             assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
-        # Invalid game.
+        # Invalid agent loading.
         if not valid_game:
             # TECH DEBT: Should I throw some kind of log from here?
             return False
@@ -162,11 +163,11 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         history = bg_game.run()
 
         # Update agents weights based on outcome of the game.
-        # TODO: Implement this, including saving of weights.
+        # TODO: NOTE: Very unsure about how to implement this.
 
         # Store the results.
         # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
-        file_str = results_path + file_time + "_" + str(episode) + ".json"
+        file_str = results_path + file_time + "_" + training_name + "_" + str(episode) + ".json"
         filename = Path(file_str)
         with open(filename, "w") as file:
             serialised = {str(key): value for key, value in history.items()}
@@ -179,7 +180,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
             if score < 0:
                 game.update({"valid_game":False})
                 break
-        game.update({"filename":file_time + "_" + str(episode)})
+        game.update({"filename":file_time + "_" + training_name + "_" + str(episode)})
         game.update({"random_seed":seed})
         game.update({"scores":history["scores"]})
         matches["games"].append(game)
@@ -190,6 +191,11 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
                 wins[i] += 1
             else:
                 losses[i] += 1
+
+        # Save training weights.
+        for agent in agent_list:
+            file_str:str = file_time + "_" + training_name
+            agent.save_weights(file_str)
 
         # Increment training variables.
         episode += 1
@@ -203,7 +209,7 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
     matches.update({"win_percentage":[w/episode for w in wins]})
     matches.update({"succ":True})
 
-    file_str = results_path + file_time + "_matches.json"
+    file_str = results_path + file_time + "_" + training_name + "_matches.json"
     match_filename = Path(file_str)
     with open(match_filename, "w") as file:
         serialised = {str(key): value for key, value in matches.items()}
@@ -285,6 +291,6 @@ if __name__ == "__main__":
     # Instantiate classes.
     random.seed(SEED)
     agent_names:list[str] = ["rl.tdgammon.TDGammon1_0", "rl.tdgammon.TDGammon1_0"]
-    train(agent_names, RESULTS_PATH, max_episodes=5)
+    train(agent_names, RESULTS_PATH, "tdgammon1_0_selfplay", max_episodes=5)
 
 # END ---------------------------------------------------------------- #

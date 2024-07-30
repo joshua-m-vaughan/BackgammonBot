@@ -191,7 +191,7 @@ class Agent():
         utils.raiseNotDefined()
         return 0
     
-    def save_weights(self) -> None:
+    def save_weights(self, filepath:str) -> None:
         """save_weights
         Save training weights for learning-based agents.
         """

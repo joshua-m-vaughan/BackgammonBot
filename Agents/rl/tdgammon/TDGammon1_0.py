@@ -16,7 +16,7 @@ from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
 from Agents.rl.template.bandit import SoftMaxBandit
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction 
-from backgammon_model import BackgammonRules
+from backgammon_model import WINNING_SCORE, BackgammonRules
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -27,6 +27,8 @@ NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 
 class myAgent(OffPolicyTDAgent):
 
+    policy_path:str = "Agents\\rl\\tdgammon\\trained_models\\"
+
     def __init__(self, _id: int) -> None:
         tmp_q = TDGammonNNQFunction(NUM_TDGAMMON1_HIDDEN, TD_ALPHA)
         tmp_gr = BackgammonRules()
@@ -36,5 +38,11 @@ class myAgent(OffPolicyTDAgent):
                          TDGammonMDP(tmp_q, tmp_gr),
                          SoftMaxBandit(_id, tmp_q))
 
+    def save_weights(self, filepath:str) -> None:
+        """save_weights
+        Save training weights for learning-based agents.
+        """
+        file_str:str = myAgent.policy_path + filepath
+        self.qfunction.save_policy(file_str)
 
 # END ---------------------------------------------------------------- #
