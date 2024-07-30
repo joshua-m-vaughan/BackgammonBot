@@ -14,6 +14,7 @@ from importlib import import_module
 from pathlib import Path
 import json
 from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
+from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
 from Agents.rl.template.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
 from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
@@ -22,6 +23,7 @@ from Agents.generic.random import myAgent as RandomAgent
 from datetime import datetime, timedelta
 import random
 import csv
+import re
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -301,7 +303,11 @@ def eval(model_path:list[str], agent_names:list[str],
     # Load models for evaluation.
     for i in range(num_agents):
         assert(type(agent_list[i]) is InferenceAgent)
-        agent_list[i].qfunction.load_policy(model_path[i])
+
+        # TD Gammon NN Qfunction provided.
+        if re.search("(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
+            agent_list[i].qfunction = TDGammonNNQFunction()
+            agent_list[i].qfunction.load_policy(model_path[i])
 
     while (current_time < finish_time and episode < max_episodes):
         time_print(f"Starting episode {episode}...")
