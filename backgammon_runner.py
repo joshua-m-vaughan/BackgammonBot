@@ -246,16 +246,18 @@ def train(agent_path:list[str], agent_names:list[str],
     time_print("Training Complete.")
     return True
 
-def eval(model_path:list[str], agent_names:list[str],
-         results_path: str, eval_name:str, seed:int = SEED,
+def eval(agent_path:list[str], agent_names:list[str],
+         model_path:list[str], results_path: str,
+         eval_name:str, seed:int = SEED,
          max_episodes:int = BASE_EPISODES,
          max_duration:int = BASE_DURATION) -> bool:
     """eval
     A script to control the evaluation of an agent playing backgammon.
 
     Args:
+        agent_path(list[str]): A list of agent paths for training.
+        agents (list[str]): A list of agents names in the training.
         model_path(list[str]): A list of model paths for evaluation.
-        agents (list[str]): A list of agents names in the evaluation.
         results_path (str): String detailing path to store evaluation results.
         eval_name(str): String providing context to evaluation example.
         seed(int): Integer for random seed.
@@ -283,17 +285,16 @@ def eval(model_path:list[str], agent_names:list[str],
     matches.update({"num_games": episode})
 
     # Insert agents into log.
-    for i in range(len(model_path)):
+    for i in range(len(agent_path)):
         team_info:dict = dict()
-        team_info["agent"] = model_path[i]
-        team_info["team_name"] = agent_names[i]
+        team_info["agent"] = agent_path[i]
+        team_info["team_name"] = agent_names[i] + "_" + model_path[i]
         matches["teams"].append(team_info)
 
     # Create agents.
     time_print("Creating agents...")
-    assert(len(model_path) == 2)
+    assert(len(agent_path) == 2)
     num_agents = 2
-    agent_path:list[str] = ["rl.template.inference", "rl.template.inference"]
     (agent_list, valid_game) = load_agent(agent_path)
     # Invalid agent loading.
     if not valid_game:
@@ -302,14 +303,13 @@ def eval(model_path:list[str], agent_names:list[str],
     
     # Load models for evaluation.
     for i in range(num_agents):
-        assert(type(agent_list[i]) is InferenceAgent)
-
-        # TD Gammon NN Qfunction provided.
-        if re.search("(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
-            agent_list[i].qfunction = TDGammonNNQFunction()
-            agent_list[i].qfunction.load_policy(model_path[i])
-        else:
-            return False
+        if type(agent_list[i]) is InferenceAgent:
+            # TD Gammon NN Qfunction provided.
+            if re.search("(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
+                agent_list[i].qfunction = TDGammonNNQFunction()
+                agent_list[i].qfunction.load_policy(model_path[i])
+            else:
+                return False
 
     while (current_time < finish_time and episode < max_episodes):
         time_print(f"Starting episode {episode}...")
