@@ -18,7 +18,7 @@ import torch.nn as nn
 
 from Agents.rl.template.qfunction import QFunction
 from ExtendedFormGame import utils
-from backgammon_model import BackgammonState
+from backgammon_model import BackgammonState, generate_td_gammon_vector
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -52,8 +52,10 @@ class TDGammonNNQFunction(QFunction):
         Returns:
             float: Q-value
         """
-        utils.raiseNotDefined()
-        return 0
+        game_vector:np.array = generate_td_gammon_vector(game_state)
+        return self.nn.forward(game_vector)
+        # NOTE: THIS MIGHT NEED TO BE UPDATED TO REFLECT A SINGULAR FLOAT VALUE
+        # FOR COMPARISON PURPOSES.
 
     def update(self, game_state:BackgammonState, game_state_p:BackgammonState,
                actions:list[tuple], reward:float, gamma:float,
@@ -69,8 +71,15 @@ class TDGammonNNQFunction(QFunction):
             gamma (float): Float for the gamma
             agent_id (int): Integer representing agent id.
         """
-        utils.raiseNotDefined()
-        return 0
+        # Determine the delta.
+        delta:float = (reward + (gamma *
+                                 (self.get_q_value(game_state_p, None)
+                                  - self.get_q_value(game_state, None))))
+        
+        # Update the weights.
+        self.nn.update_weights(self.get_q_value(game_state_p, None),
+                               self.alpha, gamma, delta)
+
 
     def save_policy(self, filename:str) -> None:
         """Saves a policy to a specific filename.
