@@ -34,7 +34,7 @@ class myAgent(OffPolicyTDAgent):
                          tmp_q,
                          tmp_gr,
                          TDGammonMDP(tmp_q, tmp_gr),
-                         SoftMaxBandit(tmp_q))
+                         SoftMaxBandit(_id, tmp_q))
 
 
 # END ---------------------------------------------------------------- #
