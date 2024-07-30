@@ -114,8 +114,6 @@ class Game():
                                        "action":selected})
             self.game_rule.update(selected)
 
-            print("Action: " + str(selected))
-
             # Early exit if there is an incorrect agent reference or warnings
             # are exceeded.
             if (self.warnings[agent_id] == self.warning_limit):

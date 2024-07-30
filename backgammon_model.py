@@ -183,11 +183,11 @@ class BackgammonRules(GameRules):
         faces.sort(reverse=True)
 
         # TECH DEBT: This shuold go to a log file!
-        print(game_state)
-        if game_state.current_agent_id == BLACK_ID:
-            print("TURN "+str(self.action_counter)+": BLACK")
-        else:
-            print("TURN "+str(self.action_counter)+": WHITE")
+        # print(game_state)
+        # if game_state.current_agent_id == BLACK_ID:
+        #     print("TURN "+str(self.action_counter)+": BLACK")
+        # else:
+        #     print("TURN "+str(self.action_counter)+": WHITE")
 
         # Generate play sequences.
         root = PlayNode(None, game_state)

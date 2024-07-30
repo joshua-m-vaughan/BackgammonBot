@@ -182,8 +182,6 @@ class TDGammonNN(nn.Module):
             for i, weights in enumerate(parameters):
                 # Compute eligbility traces:
                 # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
-                print(type(weights))
-                print(type(weights.grad))
                 self.eligibility_traces[i] = (torch.Tensor((gamma * self.lamda * self.eligibility_traces[i]))
                                               + weights.grad)
 

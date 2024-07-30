@@ -13,6 +13,7 @@ import traceback
 from importlib import import_module
 from pathlib import Path
 import json
+from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from ExtendedFormGame.template import Agent
 from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
 from ExtendedFormGame.Game import Game
@@ -132,6 +133,14 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         assert(len(agent_names) == 2)
         num_agents = 2
         (agent_list, valid_game) = load_agent(agent_names)
+        # Self-play game between TD Agents.
+        if (agent_names[BLACK_ID] == agent_names[WHITE_ID]
+            and type(agent_names[BLACK_ID]) is OffPolicyTDAgent
+            and type(agent_names[WHITE_ID]) is OffPolicyTDAgent):
+            # Both agents reference the same Q-Function.
+            agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
+            assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
+        # Invalid game.
         if not valid_game:
             # TECH DEBT: Should I throw some kind of log from here?
             return False
@@ -144,7 +153,6 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         #    # the order of the list.
         #    agent_list.reverse()
 
-
         # Create game.
         bg_rules = BackgammonRules()
         bg_game = Game(bg_rules, agent_list, agent_names, num_agents,
@@ -152,7 +160,6 @@ def train(agent_names:list, results_path: str, seed:int = SEED,
         
         # Run game.
         history = bg_game.run()
-        print(history)
 
         # Update agents weights based on outcome of the game.
         # TODO: Implement this, including saving of weights.
@@ -222,7 +229,6 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
     with open(match_filename, "r") as m_file:
         match:dict = json.load(m_file)
 
-    print(match)
     black_agent:str = match["teams"][BLACK_ID]["agent"]
     white_agent:str = match["teams"][WHITE_ID]["agent"]
     header = ["black_agent_name", "white_agent_name", "board_vector",
@@ -234,8 +240,6 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
     csv_writer.writerow(header)
 
     for m_game in match["games"]:
-        print(m_game)
-
         with open("Results\\"+m_game["filename"]+".json", "r") as g_file:
             game:dict = json.load(g_file)
 
@@ -265,8 +269,6 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
                 else:
                     won_game:int = -1
                 
-                print(bg_rules.current_agent_id)
-                print(game["scores"])
                 break
         # Store board position.
         csv_writer.writerow([black_agent, white_agent, selected_board_vector, won_game])
@@ -282,7 +284,7 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
 if __name__ == "__main__":
     # Instantiate classes.
     random.seed(SEED)
-    agent_names:list[str] = ["generic.random", "rl.tdgammon.TDGammon1_0"]
+    agent_names:list[str] = ["rl.tdgammon.TDGammon1_0", "rl.tdgammon.TDGammon1_0"]
     train(agent_names, RESULTS_PATH, max_episodes=5)
 
 # END ---------------------------------------------------------------- #
