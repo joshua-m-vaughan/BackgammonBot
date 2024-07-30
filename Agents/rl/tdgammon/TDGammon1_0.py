@@ -16,7 +16,7 @@ from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
 from Agents.rl.template.bandit import SoftMaxBandit
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction 
-from backgammon_model import WINNING_SCORE, BackgammonRules
+from backgammon_model import BackgammonRules
 
 # CONSTANTS ---------------------------------------------------------- #
 
