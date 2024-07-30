@@ -728,12 +728,12 @@ def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
     black_vector = []
     white_vector = []
     blank_vector = [0] * 4
-    for i in range(1, 24):
+    for i in range(1, 25):
         point = game_state.points_content[i]
         if point > 0:
             # Black owned point.
             if point < 4:
-                point_vec = [1 for x in range(point)] + [0 for x in range(point-4)]
+                point_vec = [1 for x in range(point)] + [0 for x in range(abs(point-4))]
             else:
                 point_vec = [1,1,1, ((point-3)/2)]
 
@@ -742,7 +742,7 @@ def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
         elif point < 0:
             # White owned point.
             if point > -4:
-                point_vec = [1 for x in range(abs(point))] + [0 for x in range(abs(point)-4)]
+                point_vec = [1 for x in range(abs(point))] + [0 for x in range(abs(abs(point)-4))]
             else:
                 point_vec = [1,1,1, ((abs(point)-3)/2)]
 
