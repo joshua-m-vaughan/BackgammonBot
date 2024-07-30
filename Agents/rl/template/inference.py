@@ -19,11 +19,11 @@ SUBSEQUENT_TURN_TIME:float = float(1.0)
 # CLASS DEF ---------------------------------------------------------- #  
 
 class myAgent(Agent):
-    def __init__(self,_id: int, qfunction:QFunction) -> None:
+    def __init__(self,_id: int) -> None:
         super().__init__(_id)
     
         # Define data structures to support off-policy TD learning.
-        self.qfunction:QFunction = qfunction
+        self.qfunction:QFunction = None
         self.turn:int = 0
 
     def select_action(self, game_state:GameState,

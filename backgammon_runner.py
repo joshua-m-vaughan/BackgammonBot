@@ -305,7 +305,7 @@ def eval(agent_path:list[str], agent_names:list[str],
     for i in range(num_agents):
         if type(agent_list[i]) is InferenceAgent:
             # TD Gammon NN Qfunction provided.
-            if re.search("(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
+            if re.search(r"(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
                 agent_list[i].qfunction = TDGammonNNQFunction()
                 agent_list[i].qfunction.load_policy(model_path[i])
             else:
@@ -463,6 +463,7 @@ if __name__ == "__main__":
     # Fill in instances.
     agent_path:list[str] = str(options.agents).split(",")
     agent_names:list[str] = str(options.agent_names).split(",")
+    model_path:list[str] = str(options.models).split(",")
     wtl:float = options.wtl
     num_warnings:int = options.num_warnings
     random.seed(options.set_seed)
@@ -477,10 +478,13 @@ if __name__ == "__main__":
         train(agent_path, agent_names, results_path, name,
               options.set_seed, max_episodes, max_duration)
     elif options.eval:
-        time_print("NOT YET IMPLEMENTED!!")
+        eval(agent_path, agent_names, model_path, results_path,
+             name, options.set_seed, max_episodes, max_duration)
 
     exit()
 
-    # Example options: --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
+    # Example options:
+    # --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
+    # --eval --name tdgammon0_0_eval_test --episodes 20 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-0806_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-0816_tdgammon0_0_selfplay_v2.pt
 
 # END ---------------------------------------------------------------- #
