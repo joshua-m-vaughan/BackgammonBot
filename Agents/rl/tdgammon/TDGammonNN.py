@@ -91,7 +91,7 @@ class TDGammonNNQFunction(QFunction):
         """
         torch.save({"model_state_dict":self.nn.state_dict,
                     "eligbility": self.nn.eligibility_traces if self.nn.eligibility_traces else []},
-                    f=filename)
+                    f=filename+".pt")
         print("Model saved")
     
     def load_policy(self, filename:str) -> None:
