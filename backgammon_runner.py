@@ -25,8 +25,8 @@ import csv
 # CONSTANTS ---------------------------------------------------------- #
 
 SEED:int = 42 # The meaning of life!
-MAX_EPISODES:int = 1000 # Number of training episodes.
-MAX_DURATION:int = 1 # Duration of training in hours.
+BASE_EPISODES:int = 5 # Number of training episodes.
+BASE_DURATION:int = 1 # Duration of training in hours.
 AGENTS_PATH:str = "Agents."
 RESULTS_PATH:str = "Results\\"
 JSON_INDENT:int = 4 # One tab
@@ -45,21 +45,23 @@ def load_parameters():
     # Training/Evaluation.
     parser.add_argument("-t", "--train", action='store_true', help="Boolean indicator of whether performing training. (default: False)", default=False, dest="train")
     parser.add_argument("-e", "--eval", action='store_true', help="Boolean indicator of whether performing evaluation. (default: False)", default=False, dest="eval")
-    
+    parser.add_argument("-n", "--name", help="A string used to provide additional identification to runtime logs.", default="", dest="name")
+    parser.add_argument("--episodes", type=int, help="Number of episodes in training or evaluation for simulation. (default=5)", default=BASE_EPISODES, dest="episodes")
+    parser.add_argument("--duration", type=int, help="Duration (in hours) of training or evaluation for simulation. (default=1)", default=BASE_DURATION, dest="duration")
+
     # Agents.
     parser.add_argument('-a','--agents', help='A list of the agents, etc, agents.myteam.player', default="generic.random,generic.random", dest="agents")
     parser.add_argument('--agent_names', help='A list of agent names', default="random0,random1", dest="agent_names") 
-    parser.add_argument('-n', '--num_agents', type='int', help='The number of agents in this game', default=2, dest="num_agents")
-    
-    # Game settings.
-    parser.add_argument('-w', '--warningTimeLimit', type='float',help='Time limit for a warning of one move in seconds (default: 1)', default=1.0, dest="wtl")
-    parser.add_argument('--num_warnings', type='int',help='Num of warnings a team can get before fail (default: 3)', default=3, dest="num_warnings")
-    parser.add_argument('--set_seed', type='int',help='Set the random seed, otherwise it will be completely random (default: 42)', default=SEED, dest="set_seed")
 
+    # Game settings.
+    parser.add_argument('-w', '--warningTimeLimit', type=float,help='Time limit for a warning of one move in seconds (default: 1)', default=1.0, dest="wtl")
+    parser.add_argument('--num_warnings', type=int,help='Num of warnings a team can get before fail (default: 3)', default=3, dest="num_warnings")
+    parser.add_argument('--set_seed', type=int,help='Set the random seed, otherwise it will be completely random (default: 42)', default=SEED, dest="set_seed")
+    parser.add_argument("-r", "--results", help="Path to store results for the runtime. (Default: 'Results')", default=RESULTS_PATH, dest="results")
     # Read args from command line
     return parser.parse_args(sys.argv[1:])
 
-def load_agent(agent_names:list,
+def load_agent(agent_path:list,
                module_path:str = AGENTS_PATH) -> tuple[list[Agent], bool]:
     """load_agent
     Returns a list of agents loaded from different paths, extending the
@@ -67,7 +69,7 @@ def load_agent(agent_names:list,
     Assignment 3.   
 
     Args:
-        agent_names (list): Agent names from agent module.
+        agent_path (list): Agent names from agent module.
         module_path (str, optional): Path to agent module. Defaults to
         AGENTS_PATH.
     
@@ -75,15 +77,15 @@ def load_agent(agent_names:list,
         tuple[list[Agent], bool]: A list of agents, and a boolean
         indicating if the agents were valid.
     """
-    agent_list = [None] * len(agent_names)
+    agent_list = [None] * len(agent_path)
     valid_game = True
-    for i in range(len(agent_names)):
+    for i in range(len(agent_path)):
         tmp_agent = None
         try:
-            agent_module = import_module(module_path+agent_names[i])
+            agent_module = import_module(module_path+agent_path[i])
             tmp_agent = agent_module.myAgent(i)
         except (NameError, ImportError, IOError):
-            print('Error: Agent at "' + agent_names[i] + '" could not be loaded!', file=sys.stderr)
+            print('Error: Agent at "' + agent_path[i] + '" could not be loaded!', file=sys.stderr)
             traceback.print_exc()
             pass
         finally:
@@ -100,10 +102,10 @@ def load_agent(agent_names:list,
 
     return (agent_list, valid_game)
 
-def train(agent_names:list, results_path: str,
+def train(agent_path:list, agent_names:list, results_path: str,
           training_name:str, seed:int = SEED,
-          max_episodes:int = MAX_EPISODES,
-          max_duration:int = MAX_DURATION) -> bool:
+          max_episodes:int = BASE_EPISODES,
+          max_duration:int = BASE_DURATION) -> bool:
     """train
     A script to control the training of a agent playing backgammon.
 
@@ -111,9 +113,9 @@ def train(agent_names:list, results_path: str,
         agents (list): A list of agents to be used for training.
         results_path (str): String detailing path to store training results.
         max_episodes (int, optional): Number of episodes to train for.
-        Defaults to MAX_EPISODES.
+        Defaults to BASE_EPISODES.
         max_duration (int, optional): Duration to train for. Defaults
-        to MAX_DURATION.
+        to BASE_DURATION.
 
     Returns:
         bool: Success indicator of training.
@@ -123,9 +125,9 @@ def train(agent_names:list, results_path: str,
     current_time:datetime = datetime.now()
     finish_time:datetime = current_time + timedelta(hours=max_duration)
     file_time:datetime = current_time.strftime("%Y%m%d-%H%M")
-    wins:list[int] = [0] * len(agent_names)
-    ties:list[int] = [0] * len(agent_names)
-    losses:list[int] = [0] * len(agent_names)
+    wins:list[int] = [0] * len(agent_path)
+    ties:list[int] = [0] * len(agent_path)
+    losses:list[int] = [0] * len(agent_path)
 
     # Initialise matches dictionary.
     matches:dict = dict()
@@ -134,21 +136,21 @@ def train(agent_names:list, results_path: str,
     matches.update({"num_games": episode})
 
     # Insert agents into log.
-    for i in range(len(agent_names)):
+    for i in range(len(agent_path)):
         team_info:dict = dict()
-        team_info["agent"] = agent_names[i]
-        team_info["team_name"] = "TODO"
+        team_info["agent"] = agent_path[i]
+        team_info["team_name"] = agent_names[i]
         matches["teams"].append(team_info)
 
     # Create agents.
     time_print("Creating agents...")
-    assert(len(agent_names) == 2)
+    assert(len(agent_path) == 2)
     num_agents = 2
-    (agent_list, valid_game) = load_agent(agent_names)
+    (agent_list, valid_game) = load_agent(agent_path)
     # Self-play game between TD Agents.
-    if (agent_names[BLACK_ID] == agent_names[WHITE_ID]
-        and type(agent_names[BLACK_ID]) is OffPolicyTDAgent
-        and type(agent_names[WHITE_ID]) is OffPolicyTDAgent):
+    if (agent_path[BLACK_ID] == agent_path[WHITE_ID]
+        and type(agent_path[BLACK_ID]) is OffPolicyTDAgent
+        and type(agent_path[WHITE_ID]) is OffPolicyTDAgent):
         # Both agents reference the same Q-Function.
         agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
         assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
@@ -164,11 +166,11 @@ def train(agent_names:list, results_path: str,
         # TODO: FIX GAME LOGGING TO HANDLE THE REVERSION.
         # Reverse the order of players halfway through training.
         #if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
-        #        or episode > ((MAX_EPISODES * 0.5)-1)):
+        #        or episode > ((BASE_EPISODES * 0.5)-1)):
 
         # Create game.
         bg_rules = BackgammonRules()
-        bg_game = Game(bg_rules, agent_list, agent_names, num_agents,
+        bg_game = Game(bg_rules, agent_list, agent_path, num_agents,
                        seed)
         
         # Run game.
@@ -203,7 +205,7 @@ def train(agent_names:list, results_path: str,
         matches["games"].append(game)
         matches.update({"num_games": episode})
 
-        for i in range(len(agent_names)):
+        for i in range(len(agent_path)):
             if (history["scores"][i] == 1):
                 wins[i] += 1
             else:
@@ -311,14 +313,30 @@ def time_print(s:str):
 # MAIN --------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    # Instantiate classes.
-    random.seed(SEED)
-    agent_names:list[str] = ["rl.tdgammon.TDGammon0_0", "rl.tdgammon.TDGammon0_0"]
-    train(agent_names, RESULTS_PATH, "tdgammon0_0_selfplay", max_episodes=5)
-    exit()
-    options = loadParameter()
+    options = load_parameters()
     time_print(str(options))
+    
+    # Fill in instances.
+    agent_path:list[str] = str(options.agents).split(",")
+    agent_names:list[str] = str(options.agent_names).split(",")
+    wtl:float = options.wtl
+    num_warnings:int = options.num_warnings
+    random.seed(options.set_seed)
+    results_path:str = options.results
 
-    if options.--
+    name:str = options.name
+    max_episodes:int = options.episodes
+    max_duration:int = options.duration
+
+    # Determine run-time.
+    if options.train:
+        train(agent_path, agent_names, results_path, name,
+              options.set_seed, max_episodes, max_duration)
+    elif options.eval:
+        time_print("NOT YET IMPLEMENTED!!")
+
+    exit()
+
+    # Example options: --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
 
 # END ---------------------------------------------------------------- #
