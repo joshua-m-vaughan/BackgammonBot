@@ -129,30 +129,28 @@ def train(agent_names:list, results_path: str,
         team_info["team_name"] = "TODO"
         matches["teams"].append(team_info)
 
+    # Create agents.
+    assert(len(agent_names) == 2)
+    num_agents = 2
+    (agent_list, valid_game) = load_agent(agent_names)
+    # Self-play game between TD Agents.
+    if (agent_names[BLACK_ID] == agent_names[WHITE_ID]
+        and type(agent_names[BLACK_ID]) is OffPolicyTDAgent
+        and type(agent_names[WHITE_ID]) is OffPolicyTDAgent):
+        # Both agents reference the same Q-Function.
+        agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
+        assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
+    # Invalid agent loading.
+    if not valid_game:
+        # TECH DEBT: Should I throw some kind of log from here?
+        return False
+
     while (current_time < finish_time and episode < max_episodes):
-        # Create agents.
-        assert(len(agent_names) == 2)
-        num_agents = 2
-        (agent_list, valid_game) = load_agent(agent_names)
-        # Self-play game between TD Agents.
-        if (agent_names[BLACK_ID] == agent_names[WHITE_ID]
-            and type(agent_names[BLACK_ID]) is OffPolicyTDAgent
-            and type(agent_names[WHITE_ID]) is OffPolicyTDAgent):
-            # Both agents reference the same Q-Function.
-            agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
-            assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
-        # Invalid agent loading.
-        if not valid_game:
-            # TECH DEBT: Should I throw some kind of log from here?
-            return False
         
         # TODO: FIX GAME LOGGING TO HANDLE THE REVERSION.
         # Reverse the order of players halfway through training.
         #if (current_time > (current_time + timedelta(hours=(max_duration*0.5)))
         #        or episode > ((MAX_EPISODES * 0.5)-1)):
-        #    # NOTE: Since we only have two players, we can just reverse
-        #    # the order of the list.
-        #    agent_list.reverse()
 
         # Create game.
         bg_rules = BackgammonRules()
@@ -192,7 +190,7 @@ def train(agent_names:list, results_path: str,
             else:
                 losses[i] += 1
 
-        # Save training weights.
+        # Checkpoint training weights.
         for agent in agent_list:
             file_str:str = file_time + "_" + training_name
             agent.save_weights(file_str)
