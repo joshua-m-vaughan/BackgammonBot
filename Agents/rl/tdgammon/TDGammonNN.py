@@ -17,7 +17,6 @@ import torch
 import torch.nn as nn
 
 from Agents.rl.template.qfunction import QFunction
-from ExtendedFormGame import utils
 from backgammon_model import BackgammonState, generate_td_gammon_vector
 
 # CONSTANTS ---------------------------------------------------------- #
@@ -27,6 +26,7 @@ TD_LAMDA:float = 0.01 # TO DETERMINE WHAT THIS IS.
 NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
+torch.set_default_tensor_type('torch.DoubleTensor')
 
 # CLASS DEF ---------------------------------------------------------- #      
 
@@ -53,7 +53,7 @@ class TDGammonNNQFunction(QFunction):
             float: Q-value
         """
         game_vector:np.array = generate_td_gammon_vector(game_state)
-        return self.nn.forward(game_vector)
+        return self.nn.forward(game_vector).detach().numpy()[0]
         # NOTE: THIS MIGHT NEED TO BE UPDATED TO REFLECT A SINGULAR FLOAT VALUE
         # FOR COMPARISON PURPOSES.
 
@@ -77,8 +77,10 @@ class TDGammonNNQFunction(QFunction):
                                   - self.get_q_value(game_state, None))))
         
         # Update the weights.
-        self.nn.update_weights(self.get_q_value(game_state_p, None),
-                               self.alpha, gamma, delta)
+        #NOTE: Improve efficiency by removing duplication of vectorisation.
+        game_vec:np.array = generate_td_gammon_vector(game_state)
+        self.nn.update_weights(self.nn.forward(game_vec),
+                               self.alpha, gamma, delta[agent_id])
 
 
     def save_policy(self, filename:str) -> None:
@@ -177,10 +179,12 @@ class TDGammonNN(nn.Module):
             # Get parameters of the model.
             parameters = list(self.parameters())
 
-            for i, weights in parameters:
+            for i, weights in enumerate(parameters):
                 # Compute eligbility traces:
                 # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
-                self.eligibility_traces[i] = ((gamma * self.lamda * self.eligibility_traces[i])
+                print(type(weights))
+                print(type(weights.grad))
+                self.eligibility_traces[i] = (torch.Tensor((gamma * self.lamda * self.eligibility_traces[i]))
                                               + weights.grad)
 
                 # Parameter Update:
