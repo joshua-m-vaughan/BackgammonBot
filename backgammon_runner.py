@@ -485,6 +485,6 @@ if __name__ == "__main__":
 
     # Example options:
     # --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
-    # --eval --name tdgammon0_0_eval_test --episodes 20 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-0806_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-0816_tdgammon0_0_selfplay_v2.pt
+    # --eval --name tdgammon0_0_eval_test --episodes 10 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-0839_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-0839_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
 
 # END ---------------------------------------------------------------- #

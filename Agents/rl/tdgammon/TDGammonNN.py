@@ -89,7 +89,7 @@ class TDGammonNNQFunction(QFunction):
             filename (str): String describing filepath and filename
             to save Q-function to.
         """
-        torch.save({"model_state_dict":self.nn.state_dict,
+        torch.save({"model_state_dict":self.nn.state_dict(),
                     "eligbility": self.nn.eligibility_traces if self.nn.eligibility_traces else []},
                     f=filename+".pt")
     
