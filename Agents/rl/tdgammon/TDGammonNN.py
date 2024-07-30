@@ -18,7 +18,7 @@ import torch.nn as nn
 
 from Agents.rl.template.qfunction import QFunction
 from ExtendedFormGame import utils
-from ExtendedFormGame.template import GameState
+from backgammon_model import BackgammonState
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -40,7 +40,7 @@ class TDGammonNNQFunction(QFunction):
         super().__init__(alpha)
         self.nn:TDGammonNN = TDGammonNN(hidden_features, lamda)
         
-    def get_q_value(self, game_state:GameState,
+    def get_q_value(self, game_state:BackgammonState,
                     action:tuple) -> float:
         """ get_q_value
         Return Q-value for action,game_state pair.
@@ -55,7 +55,7 @@ class TDGammonNNQFunction(QFunction):
         utils.raiseNotDefined()
         return 0
 
-    def update(self, game_state:GameState, game_state_p:GameState,
+    def update(self, game_state:BackgammonState, game_state_p:BackgammonState,
                actions:list[tuple], reward:float, gamma:float,
                agent_id:int) -> None:
         """update
