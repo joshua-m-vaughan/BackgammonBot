@@ -1,7 +1,7 @@
 # INFORMATION -------------------------------------------------------- #
 
 # Author:  Josh Vaughan
-# Date:    XX/07/2024
+# Date:    29/07/2024
 # Purpose: Implements Neural Netowrk and QFunction using the
 #          TD-Gammon 1.0 approach outlined by Tesauro's paper.
 
@@ -26,7 +26,6 @@ TD_LAMDA:float = 0.01 # TO DETERMINE WHAT THIS IS.
 NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
-torch.set_default_tensor_type('torch.DoubleTensor')
 
 # CLASS DEF ---------------------------------------------------------- #      
 

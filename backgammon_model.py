@@ -725,26 +725,26 @@ def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
     """
 
     # Determine agent vectors.
-    black_vector = []
-    white_vector = []
-    blank_vector = [0] * 4
+    black_vector:list[float] = []
+    white_vector:list[float] = []
+    blank_vector:list[float] = [0] * 4
     for i in range(1, 25):
         point = game_state.points_content[i]
         if point > 0:
             # Black owned point.
             if point < 4:
-                point_vec = [1 for x in range(point)] + [0 for x in range(abs(point-4))]
+                point_vec:list[float] = [1 for x in range(point)] + [0 for x in range(abs(point-4))]
             else:
-                point_vec = [1,1,1, ((point-3)/2)]
+                point_vec:list[float] = [1,1,1, ((point-3)/2)]
 
             black_vector += point_vec
             white_vector += blank_vector
         elif point < 0:
             # White owned point.
             if point > -4:
-                point_vec = [1 for x in range(abs(point))] + [0 for x in range(abs(abs(point)-4))]
+                point_vec:list[float] = [1 for x in range(abs(point))] + [0 for x in range(abs(abs(point)-4))]
             else:
-                point_vec = [1,1,1, ((abs(point)-3)/2)]
+                point_vec:list[float] = [1,1,1, ((abs(point)-3)/2)]
 
             white_vector += point_vec
             black_vector += blank_vector
@@ -753,7 +753,7 @@ def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
             black_vector += blank_vector
             white_vector += blank_vector
     
-    vector:list = black_vector + white_vector
+    vector:list[float] = black_vector + white_vector
     
     # Pieces on bar.
     vector.append((game_state.black_checkers_taken / 2))
@@ -767,6 +767,6 @@ def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
     vector.append((1 if game_state.current_agent_id == BLACK_ID else 0))
     vector.append((1 if game_state.current_agent_id == WHITE_ID else 0))
 
-    return np.array(vector)
+    return np.array(vector, dtype="f")
 
 # END ---------------------------------------------------------------- #
