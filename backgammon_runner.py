@@ -130,6 +130,7 @@ def train(agent_names:list, results_path: str,
         matches["teams"].append(team_info)
 
     # Create agents.
+    time_print("Creating agents...")
     assert(len(agent_names) == 2)
     num_agents = 2
     (agent_list, valid_game) = load_agent(agent_names)
@@ -146,6 +147,8 @@ def train(agent_names:list, results_path: str,
         return False
 
     while (current_time < finish_time and episode < max_episodes):
+        time_print(f"Starting episode {episode}...")
+        start:datetime = datetime.now()
         
         # TODO: FIX GAME LOGGING TO HANDLE THE REVERSION.
         # Reverse the order of players halfway through training.
@@ -162,6 +165,10 @@ def train(agent_names:list, results_path: str,
 
         # Update agents weights based on outcome of the game.
         # TODO: NOTE: Very unsure about how to implement this.
+
+        elapsed:datetime = datetime.now() - start
+        time_print(f"Elapsed episode time {elapsed}")
+        time_print("Checkpointing results...\n")
 
         # Store the results.
         # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
@@ -181,6 +188,7 @@ def train(agent_names:list, results_path: str,
         game.update({"filename":file_time + "_" + training_name + "_" + str(episode)})
         game.update({"random_seed":seed})
         game.update({"scores":history["scores"]})
+        game.update({"training_time":str(elapsed)})
         matches["games"].append(game)
         matches.update({"num_games": episode})
 
@@ -199,6 +207,8 @@ def train(agent_names:list, results_path: str,
         episode += 1
         current_time = datetime.now()
     
+    time_print("Saving epoch results...")
+
     # Write training overview details.
     # e.g. elapsed episode time, number of games, agent names.
     matches.update({"wins":wins})
@@ -213,6 +223,7 @@ def train(agent_names:list, results_path: str,
         serialised = {str(key): value for key, value in matches.items()}
         json.dump(serialised, file, indent=JSON_INDENT)
 
+    time_print("Training Complete.")
     return True
 
 
@@ -282,6 +293,9 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
     assert(csv_file.closed)
 
     return None
+
+def time_print(s:str):
+    print("[{}] {}".format(datetime.now().strftime("%H:%M:%S"), s))
 
 # MAIN --------------------------------------------------------------- #
 
