@@ -5,7 +5,7 @@
 - [X] Finish training file storage for backgammon games.
 - [X] Extended training to beyond the run scope of the game.
 - [ ] Implement existing model from literature for comparison against previous iterations in the field.
-    - [ ] TD Gammon 0.0 requires onpolicy learning: this will unlikely be able to use PyTorch due to the specific gradient descent method.
+    - [X] TD Gammon 0.0 requires onpolicy learning: this will unlikely be able to use PyTorch due to the specific gradient descent method.
     - [ ] TD Gammon 3.0: use MCTS for a 3-depth search into the 
     - [ ] Compare performance of the performance of these two models.
 - [ ] Create an evaluation script for agent.
