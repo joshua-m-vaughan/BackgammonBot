@@ -14,6 +14,7 @@ from queue import LifoQueue
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
 from backgammon_tree import PlayNode
+import numpy as np
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -704,5 +705,68 @@ class BackgammonRules(GameRules):
 
 class BackgammonAction(Action):
     pass
+
+# FUNC DEF ----------------------------------------------------------- #
+
+def generate_td_gammon_vector(game_state:BackgammonState) -> np.array:
+    """generate_td_gammon_vector
+    Turn a BackgammonState object into a vector representation used in
+    the TD-gammon technique outlined in Tesaruo's paper.
+
+    Reference List:
+        Tesauro, G. (1995). Temporal difference learning and TD-Gammon.
+        Communications of the ACM, 38(3), 58-68.
+
+    Args:
+        game_state (BackgammonState): BackgammonState s.
+
+    Returns:
+        np.array: Vector representation of game state.
+    """
+
+    # Determine agent vectors.
+    black_vector = []
+    white_vector = []
+    blank_vector = [0] * 4
+    for i in range(1, 24):
+        point = game_state.points_content[i]
+        if point > 0:
+            # Black owned point.
+            if point < 4:
+                point_vec = [1 for x in range(point)] + [0 for x in range(point-4)]
+            else:
+                point_vec = [1,1,1, ((point-3)/2)]
+
+            black_vector += point_vec
+            white_vector += blank_vector
+        elif point < 0:
+            # White owned point.
+            if point > -4:
+                point_vec = [1 for x in range(abs(point))] + [0 for x in range(abs(point)-4)]
+            else:
+                point_vec = [1,1,1, ((abs(point)-3)/2)]
+
+            white_vector += point_vec
+            black_vector += blank_vector
+        else:
+            # Empty point.
+            black_vector += blank_vector
+            white_vector += blank_vector
+    
+    vector:list = black_vector + white_vector
+    
+    # Pieces on bar.
+    vector.append((game_state.black_checkers_taken / 2))
+    vector.append((game_state.white_checkers_taken / 2))
+
+    # Pieces removed.
+    vector.append(abs(game_state.points_content[BLACK_HOME_POINT]) / 2)
+    vector.append(abs(game_state.points_content[WHITE_HOME_POINT]) / 2)
+
+    # Agents turn.
+    vector.append((1 if game_state.current_agent_id == BLACK_ID else 0))
+    vector.append((1 if game_state.current_agent_id == WHITE_ID else 0))
+
+    return np.array(vector)
 
 # END ---------------------------------------------------------------- #
