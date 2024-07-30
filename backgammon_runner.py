@@ -282,10 +282,7 @@ def extract_board_positions(match_filename:str, out_filename:str) -> None:
 if __name__ == "__main__":
     # Instantiate classes.
     random.seed(SEED)
-    #agent_names:list[str] = ["generic.random", "heuristic.running"]
-    #train(agent_names, RESULTS_PATH, max_episodes=5)
-
-    extract_board_positions("Results\\20240726-1055_matches.json",
-                            "Results\\20240726-1055_board_value.csv")
+    agent_names:list[str] = ["generic.random", "rl.tdgammon.TDGammon1_0"]
+    train(agent_names, RESULTS_PATH, max_episodes=5)
 
 # END ---------------------------------------------------------------- #
