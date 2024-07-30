@@ -40,20 +40,20 @@ class myAgent(Agent):
         """
 
         # Initialise heuristic values.
-        max_h: float = -inf
-        max_actions: list[tuple] = []
+        min_h: float = float("inf")
+        min_actions: list[tuple] = []
 
         # Access heuristic values.
         for action in actions:
             tmp_h = self.heuristic(game_state, action)
-            if tmp_h > max_h:
-                max_h = tmp_h
-                max_actions = [action]
-            elif tmp_h == max_h:
-                max_actions.append(action)
+            if tmp_h < min_h:
+                min_h = tmp_h
+                min_actions = [action]
+            elif tmp_h == min_h:
+                min_actions.append(action)
         
         # Select heuristic maximising action
-        return random.choice(max_actions)
+        return random.choice(min_actions)
     
     def heuristic(self, game_state:GameState,
                   action:tuple) -> float:
@@ -73,8 +73,8 @@ class myAgent(Agent):
         game_state_prime = self.game_rules.generate_successor(tmp_game_state,
                                                               action,
                                                               self.id)
-        heuristic:float = (self.game_rules.calculate_score(game_state_prime, self.id)
-                           - self.game_rules.calculate_score(game_state, self.id))
+        heuristic:float = (self.game_rules.calculate_score(game_state, self.id)
+                           - self.game_rules.calculate_score(game_state_prime, self.id))
         return heuristic
 
 
