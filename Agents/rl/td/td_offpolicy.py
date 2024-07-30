@@ -55,7 +55,7 @@ class OffPolicyTDAgent(Agent):
             action:tuple = random.choice(actions)
         else:
             # Subsequent action: Bandit select next action.
-            action:tuple = self.bandit.select_action(actions, game_state)
+            action:tuple = self.bandit.select_action(game_state, actions)
 
             # Observe reward
             reward:list[float] = self.mdp.get_reward(self.last_state,
