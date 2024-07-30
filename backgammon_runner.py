@@ -308,6 +308,8 @@ def eval(model_path:list[str], agent_names:list[str],
         if re.search("(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
             agent_list[i].qfunction = TDGammonNNQFunction()
             agent_list[i].qfunction.load_policy(model_path[i])
+        else:
+            return False
 
     while (current_time < finish_time and episode < max_episodes):
         time_print(f"Starting episode {episode}...")
