@@ -6,7 +6,7 @@ From: rockylinux:8
 %post
     dnf -y update
     dnf -y install vim wget git python3.11 python3.11-pip
-    pip3 install --upgrade \ 
+    pip3 install --upgrade pip
     pip3 install func-timeout==4.3.5 numpy==1.26.4
     # Installs pytorch 2.4.0 on linux with pip for CUDA11.8 platform.
     pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
