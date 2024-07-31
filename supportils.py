@@ -1,8 +1,9 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 import json
 import csv
 from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
+import random
 
 JSON_INDENT:int = 4 # One tab
 
