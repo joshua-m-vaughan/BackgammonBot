@@ -11,19 +11,18 @@ import argparse
 import sys
 import traceback
 from importlib import import_module
-from pathlib import Path
-import json
 from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
 from Agents.rl.template.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
-from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
+from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules
 from ExtendedFormGame.Game import Game
 from Agents.generic.random import myAgent as RandomAgent
 from datetime import datetime, timedelta
 import random
-import csv
 import re
+
+from supportils import initialise_results, checkpoint_results, save_results, time_print
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -132,24 +131,11 @@ def train(agent_path:list[str], agent_names:list[str],
     current_time:datetime = datetime.now()
     finish_time:datetime = current_time + timedelta(hours=max_duration)
     file_time:datetime = current_time.strftime("%Y%m%d-%H%M")
-    wins:list[int] = [0] * len(agent_path)
-    ties:list[int] = [0] * len(agent_path)
-    losses:list[int] = [0] * len(agent_path)
     random.seed(seed)
 
     # Initialise matches dictionary.
-    matches:dict = dict()
-    matches.update({"games":[]})
-    matches.update({"teams":[]})
-    matches.update({"num_games": episode})
-    matches.update({"seed":seed})
-
-    # Insert agents into log.
-    for i in range(len(agent_path)):
-        team_info:dict = dict()
-        team_info["agent"] = agent_path[i]
-        team_info["team_name"] = agent_names[i]
-        matches["teams"].append(team_info)
+    matches:dict = initialise_results(agent_path, agent_names,
+                                      model_path, seed)
 
     # Create agents.
     time_print("Creating agents...")
@@ -168,7 +154,7 @@ def train(agent_path:list[str], agent_names:list[str],
         # TECH DEBT: Should I throw some kind of log from here?
         return False
 
-    while (current_time < finish_time and episode < max_episodes):
+    while (datetime.now() < finish_time and episode < max_episodes):
         time_print(f"Starting episode {episode}...")
         start:datetime = datetime.now()
         
@@ -178,7 +164,7 @@ def train(agent_path:list[str], agent_names:list[str],
         #        or episode > ((BASE_EPISODES * 0.5)-1)):
 
         # Create game.
-        tmp_seed:float = random.randint()
+        tmp_seed:float = random.random()
         bg_rules = BackgammonRules()
         bg_game = Game(bg_rules, agent_list, agent_path, num_agents,
                        tmp_seed)
@@ -193,58 +179,24 @@ def train(agent_path:list[str], agent_names:list[str],
         time_print(f"Elapsed episode time {elapsed}")
         time_print("Checkpointing results...\n")
 
-        # Store the results.
-        # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
-        file_str = results_path + file_time + "_" + training_name + "_" + str(episode) + ".json"
-        filename = Path(file_str)
-        with open(filename, "w") as file:
-            serialised = {str(key): value for key, value in history.items()}
-            json.dump(serialised, file, indent=JSON_INDENT)
-        
-        # Store training-level results.
-        game:dict = dict()
-        game.update({"valid_game":True})
-        for score in history["scores"]:
-            if score < 0:
-                game.update({"valid_game":False})
-                break
-        game.update({"filename":file_time + "_" + training_name + "_" + str(episode)})
-        game.update({"random_seed":tmp_seed})
-        game.update({"scores":history["scores"]})
-        game.update({"training_time":str(elapsed)})
-        matches["games"].append(game)
-        matches.update({"num_games": episode})
+        # Increment training variables.
+        episode += 1
 
-        for i in range(len(agent_path)):
-            if (history["scores"][i] == 1):
-                wins[i] += 1
-            else:
-                losses[i] += 1
+        # Checkpoint results
+        matches = checkpoint_results(matches, history, results_path,
+                                     file_time, training_name, tmp_seed,
+                                     episode, elapsed)
 
         # Checkpoint training weights.
         for agent in agent_list:
             file_str:str = file_time + "_" + training_name
             agent.save_weights(file_str)
-
-        # Increment training variables.
-        episode += 1
-        current_time = datetime.now()
     
     time_print("Saving epoch results...")
 
     # Write training overview details.
-    # e.g. elapsed episode time, number of games, agent names.
-    matches.update({"wins":wins})
-    matches.update({"ties":ties})
-    matches.update({"losses":losses})
-    matches.update({"win_percentage":[w/episode for w in wins]})
-    matches.update({"succ":True})
-
-    file_str = results_path + file_time + "_" + training_name + "_matches.json"
-    match_filename = Path(file_str)
-    with open(match_filename, "w") as file:
-        serialised = {str(key): value for key, value in matches.items()}
-        json.dump(serialised, file, indent=JSON_INDENT)
+    matches = save_results(matches, results_path, file_time,
+                           training_name)
 
     time_print("Training Complete.")
     return True
@@ -277,24 +229,11 @@ def eval(agent_path:list[str], agent_names:list[str],
     current_time:datetime = datetime.now()
     finish_time:datetime = current_time + timedelta(hours=max_duration)
     file_time:datetime = current_time.strftime("%Y%m%d-%H%M")
-    wins:list[int] = [0] * len(model_path)
-    ties:list[int] = [0] * len(model_path)
-    losses:list[int] = [0] * len(model_path)
     random.seed(seed)
 
     # Initialise matches dictionary.
-    matches:dict = dict()
-    matches.update({"games":[]})
-    matches.update({"teams":[]})
-    matches.update({"num_games": episode})
-    matches.update({"seed":seed})
-
-    # Insert agents into log.
-    for i in range(len(agent_path)):
-        team_info:dict = dict()
-        team_info["agent"] = agent_path[i]
-        team_info["team_name"] = agent_names[i] + "_" + model_path[i]
-        matches["teams"].append(team_info)
+    matches:dict = initialise_results(agent_path, agent_names,
+                                      model_path, seed)
 
     # Create agents.
     time_print("Creating agents...")
@@ -316,7 +255,7 @@ def eval(agent_path:list[str], agent_names:list[str],
             else:
                 return False
 
-    while (current_time < finish_time and episode < max_episodes):
+    while (datetime.now() < finish_time and episode < max_episodes):
         time_print(f"Starting episode {episode}...")
         start:datetime = datetime.now()
         
@@ -339,126 +278,22 @@ def eval(agent_path:list[str], agent_names:list[str],
         time_print(f"Elapsed episode time {elapsed}")
         time_print("Checkpointing results...\n")
 
-        
-        # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
-        file_str = results_path + file_time + "_" + eval_name + "_" + str(episode) + ".json"
-        filename = Path(file_str)
-        with open(filename, "w") as file:
-            serialised = {str(key): value for key, value in history.items()}
-            json.dump(serialised, file, indent=JSON_INDENT)
-        
-        # Store training-level results.
-        game:dict = dict()
-        game.update({"valid_game":True})
-        for score in history["scores"]:
-            if score < 0:
-                game.update({"valid_game":False})
-                break
-        game.update({"filename":file_time + "_" + eval_name + "_" + str(episode)})
-        game.update({"random_seed":tmp_seed})
-        game.update({"scores":history["scores"]})
-        game.update({"training_time":str(elapsed)})
-        matches["games"].append(game)
-        matches.update({"num_games": episode})
-
-        for i in range(len(agent_path)):
-            if (history["scores"][i] == 1):
-                wins[i] += 1
-            else:
-                losses[i] += 1
-
         # Increment training variables.
         episode += 1
-        current_time = datetime.now()
+
+        # Checkpoint results
+        matches = checkpoint_results(matches, history, results_path,
+                                     file_time, eval_name, tmp_seed,
+                                     episode, elapsed)
     
     time_print("Saving epoch results...")
 
     # Write training overview details.
-    # e.g. elapsed episode time, number of games, agent names.
-    matches.update({"wins":wins})
-    matches.update({"ties":ties})
-    matches.update({"losses":losses})
-    matches.update({"win_percentage":[w/episode for w in wins]})
-    matches.update({"succ":True})
-
-    file_str = results_path + file_time + "_" + eval_name + "_matches.json"
-    match_filename = Path(file_str)
-    with open(match_filename, "w") as file:
-        serialised = {str(key): value for key, value in matches.items()}
-        json.dump(serialised, file, indent=JSON_INDENT)
+    matches = save_results(matches, results_path, file_time,
+                           eval_name)
 
     time_print("Evaluation Complete.")
     return True
-
-def extract_board_positions(match_filename:str, out_filename:str) -> None:
-    """extract_board_positions
-    Returns a list of tuples that stores the black agent name, white
-    agent name, the randomly selected board position, and the winner of
-    the game.
-
-    Args:
-        filename (str): String detailing the file_name of the matches
-        training epoch summary.
-
-    Returns:
-        list[tuple]: _description_
-    """
-
-    with open(match_filename, "r") as m_file:
-        match:dict = json.load(m_file)
-
-    black_agent:str = match["teams"][BLACK_ID]["agent"]
-    white_agent:str = match["teams"][WHITE_ID]["agent"]
-    header = ["black_agent_name", "white_agent_name", "board_vector",
-              "match_winner"]
-
-    # Open file.
-    csv_file = open(out_filename, "w")
-    csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(header)
-
-    for m_game in match["games"]:
-        with open("Results\\"+m_game["filename"]+".json", "r") as g_file:
-            game:dict = json.load(g_file)
-
-        # Select a random board position.
-        selected_pos_num = random.randrange(0, len(game["actions"]))
-        
-        # Simulate game to that board position.
-        bg_rules = BackgammonRules()
-        for turn in game["actions"]:
-            # Simulate the action.
-            assert(type(turn["action"]) is list)
-            for move in turn["action"]:
-                assert(type(move) is list)
-            bg_rules.update(turn["action"])
-
-            # Determine if this is the relevant board position.
-            if turn["turn"] == selected_pos_num:
-                # Generate vector representation.
-                selected_board_vector = generate_td_gammon_vector(bg_rules.current_game_state)
-                # Determine who won.
-                if (bg_rules.current_agent_id == BLACK_ID
-                    and game["scores"][BLACK_ID]):
-                    won_game:int = 1
-                elif (bg_rules.current_agent_id == WHITE_ID
-                    and game["scores"][WHITE_ID]):
-                    won_game:int = 1
-                else:
-                    won_game:int = -1
-                
-                break
-        # Store board position.
-        csv_writer.writerow([black_agent, white_agent, selected_board_vector, won_game])
-
-    # All positions have been extracted.
-    csv_file.close()
-    assert(csv_file.closed)
-
-    return None
-
-def time_print(s:str):
-    print("[{}] {}".format(datetime.now().strftime("%H:%M:%S"), s))
 
 # MAIN --------------------------------------------------------------- #
 
@@ -491,6 +326,6 @@ if __name__ == "__main__":
 
     # Example options:
     # --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
-    # --eval --name tdgammon0_0_eval_test --episodes 10 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-0839_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-0839_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
+    # --eval --name tdgammon0_0_eval_test --episodes 5 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-1656_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-1656_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
 
 # END ---------------------------------------------------------------- #
