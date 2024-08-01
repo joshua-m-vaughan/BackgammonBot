@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from pathlib import Path
+from pathlib import PurePosixPath, PureWindowsPath
 import json
 import csv
 from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules, generate_td_gammon_vector
@@ -28,14 +28,17 @@ def initialise_results(agent_path:list[str], agent_names:list[str],
     
     return matches
 
-def checkpoint_results(matches:dict, history:dict, results_path:str,
-                       file_time:str, name:str, seed:float,
+def checkpoint_results(matches:dict, history:dict,
+                       results_path:PureWindowsPath, file_time:str,
+                       name:str, seed:float,
                        episode:int, elapsed:timedelta) -> dict:
     # Store the history trace.
     # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
-    file_str = results_path + file_time + "_" + name + "_" + str(episode) + ".json"
-    filename = Path(file_str)
-    with open(filename, "w") as file:
+    filename:str = file_time + "_" + name + "_" + str(episode) + ".json"
+    filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
+    filepath_str:str = str(PurePosixPath(filepath))
+    print(filepath_str)
+    with open(filepath_str, "w") as file:
         serialised = {str(key): value for key, value in history.items()}
         json.dump(serialised, file, indent=JSON_INDENT)
 
@@ -62,14 +65,16 @@ def checkpoint_results(matches:dict, history:dict, results_path:str,
 
     return matches
 
-def save_results(matches:dict, results_path:str,
+def save_results(matches:dict, results_path:PureWindowsPath,
                  file_time:str, name:str):
     matches.update({"win_percentage": [w/matches["num_games"] for w in matches["wins"]]})
     matches.update({"succ":True})
 
-    file_str = results_path + file_time + "_" + name + "_matches.json"
-    match_filename = Path(file_str)
-    with open(match_filename, "w") as file:
+    filename:str = file_time + "_" + name + "_matches.json"
+    filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
+    filepath_str:str = str(PurePosixPath(filepath))
+    print(filepath_str)
+    with open(filepath_str, "w") as file:
         serialised = {str(key): value for key, value in matches.items()}
         json.dump(serialised, file, indent=JSON_INDENT)
 

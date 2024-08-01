@@ -17,6 +17,7 @@ from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
 from Agents.rl.template.bandit import SoftMaxBandit
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction 
 from backgammon_model import BackgammonRules
+from pathlib import PureWindowsPath
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -27,7 +28,8 @@ NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 
 class myAgent(OffPolicyTDAgent):
 
-    policy_path:str = "Agents\\rl\\tdgammon\\trained_models\\"
+    policy_path:PureWindowsPath = PureWindowsPath(r"Agents\\rl\\tdgammon\\trained_models\\")
+    policy_filetype:str = ".pt"
 
     def __init__(self, _id: int) -> None:
         tmp_q = TDGammonNNQFunction(NUM_TDGAMMON1_HIDDEN, TD_ALPHA)
@@ -42,7 +44,8 @@ class myAgent(OffPolicyTDAgent):
         """save_weights
         Save training weights for learning-based agents.
         """
-        file_str:str = myAgent.policy_path + filepath
+        file_str:PureWindowsPath = PureWindowsPath(myAgent.policy_path,
+                                                   filepath+myAgent.policy_filetype)
         self.qfunction.save_policy(file_str)
 
 # END ---------------------------------------------------------------- #

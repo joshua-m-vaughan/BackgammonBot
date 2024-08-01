@@ -12,6 +12,7 @@
 # IMPORTS ------------------------------------------------------------ #
 
 from copy import deepcopy
+from pathlib import PurePosixPath, PureWindowsPath
 import numpy as np
 import torch
 import torch.nn as nn
@@ -82,25 +83,29 @@ class TDGammonNNQFunction(QFunction):
                                self.alpha, gamma, delta[agent_id])
 
 
-    def save_policy(self, filename:str) -> None:
+    def save_policy(self, filepath:PureWindowsPath) -> None:
         """Saves a policy to a specific filename.
     
         Args:
-            filename (str): String describing filepath and filename
+            filepath (PureWindowsPath): String describing filepath and filename
             to save Q-function to.
         """
+        filepath_str:str = str(PurePosixPath(filepath))
+        print(filepath_str)
         torch.save({"model_state_dict":self.nn.state_dict(),
                     "eligbility": self.nn.eligibility_traces if self.nn.eligibility_traces else []},
-                    f=filename+".pt")
+                    f=filepath_str)
     
-    def load_policy(self, filename:str) -> None:
+    def load_policy(self, filepath:PureWindowsPath) -> None:
         """Load a policy from a specific filename.
 
         Args:
-            filename (str): String describing filepath and filename
+            filepath (PureWindowsPath): String describing filepath and filename
             to save Q-function to.
         """
-        checkpoint = torch.load(filename)
+        filepath_str:str = str(PurePosixPath(filepath))
+        print(filepath_str)
+        checkpoint = torch.load(filepath_str)
         self.nn.load_state_dict(checkpoint["model_state_dict"])
         self.nn.eligibility_traces = checkpoint["eligbility"]
 

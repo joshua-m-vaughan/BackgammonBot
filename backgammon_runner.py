@@ -8,6 +8,7 @@
 # IMPORTS ------------------------------------------------------------ #
 
 import argparse
+from pathlib import PurePosixPath, PureWindowsPath
 import sys
 import traceback
 from importlib import import_module
@@ -29,8 +30,8 @@ from supportils import initialise_results, checkpoint_results, save_results, tim
 SEED:int = 42 # The meaning of life!
 BASE_EPISODES:int = 5 # Number of training episodes.
 BASE_DURATION:int = 1 # Duration of training in hours.
-AGENTS_PATH:str = "Agents."
-RESULTS_PATH:str = "results\\train\\"
+AGENTS_MODULE_PATH:str = "Agents."
+RESULTS_PATH:PureWindowsPath = PureWindowsPath("results", "train")
 JSON_INDENT:int = 4 # One tab
 
 # FUNC DEF ----------------------------------------------------------- #
@@ -65,7 +66,7 @@ def load_parameters():
     return parser.parse_args(sys.argv[1:])
 
 def load_agent(agent_path:list,
-               module_path:str = AGENTS_PATH) -> tuple[list[Agent], bool]:
+               module_path:str = AGENTS_MODULE_PATH) -> tuple[list[Agent], bool]:
     """load_agent
     Returns a list of agents loaded from different paths, extending the
     approach in the extended form game framework from COMP90054
@@ -74,7 +75,7 @@ def load_agent(agent_path:list,
     Args:
         agent_path (list): Agent names from agent module.
         module_path (str, optional): Path to agent module. Defaults to
-        AGENTS_PATH.
+        AGENTS_MODULE_PATH.
     
     Returns:
         tuple[list[Agent], bool]: A list of agents, and a boolean
@@ -189,7 +190,9 @@ def train(agent_path:list[str], agent_names:list[str],
 
         # Checkpoint training weights.
         for agent in agent_list:
-            file_str:str = file_time + "_" + training_name
+            filepath:PureWindowsPath = PureWindowsPath(file_time+"_"+training_name)
+            file_str:str = str(PurePosixPath(filepath))
+            print(file_str)
             agent.save_weights(file_str)
     
     time_print("Saving epoch results...")
@@ -308,7 +311,7 @@ if __name__ == "__main__":
     wtl:float = options.wtl
     num_warnings:int = options.num_warnings
     random.seed(options.set_seed)
-    results_path:str = options.results
+    results_path:PureWindowsPath = PureWindowsPath(options.results)
 
     name:str = options.name
     max_episodes:int = options.episodes
