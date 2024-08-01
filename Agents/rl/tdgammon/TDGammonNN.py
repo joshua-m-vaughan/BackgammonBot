@@ -91,7 +91,6 @@ class TDGammonNNQFunction(QFunction):
             to save Q-function to.
         """
         filepath_str:str = str(PurePosixPath(filepath))
-        print(filepath_str)
         torch.save({"model_state_dict":self.nn.state_dict(),
                     "eligbility": self.nn.eligibility_traces if self.nn.eligibility_traces else []},
                     f=filepath_str)
@@ -104,7 +103,6 @@ class TDGammonNNQFunction(QFunction):
             to save Q-function to.
         """
         filepath_str:str = str(PurePosixPath(filepath))
-        print(filepath_str)
         checkpoint = torch.load(filepath_str)
         self.nn.load_state_dict(checkpoint["model_state_dict"])
         self.nn.eligibility_traces = checkpoint["eligbility"]

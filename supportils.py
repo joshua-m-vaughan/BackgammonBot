@@ -37,7 +37,6 @@ def checkpoint_results(matches:dict, history:dict,
     filename:str = file_time + "_" + name + "_" + str(episode) + ".json"
     filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
     filepath_str:str = str(PurePosixPath(filepath))
-    print(filepath_str)
     with open(filepath_str, "w") as file:
         serialised = {str(key): value for key, value in history.items()}
         json.dump(serialised, file, indent=JSON_INDENT)
@@ -73,7 +72,6 @@ def save_results(matches:dict, results_path:PureWindowsPath,
     filename:str = file_time + "_" + name + "_matches.json"
     filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
     filepath_str:str = str(PurePosixPath(filepath))
-    print(filepath_str)
     with open(filepath_str, "w") as file:
         serialised = {str(key): value for key, value in matches.items()}
         json.dump(serialised, file, indent=JSON_INDENT)

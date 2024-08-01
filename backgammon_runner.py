@@ -192,7 +192,6 @@ def train(agent_path:list[str], agent_names:list[str],
         for agent in agent_list:
             filepath:PureWindowsPath = PureWindowsPath(file_time+"_"+training_name)
             file_str:str = str(PurePosixPath(filepath))
-            print(file_str)
             agent.save_weights(file_str)
     
     time_print("Saving epoch results...")
