@@ -13,4 +13,4 @@ From: rockylinux:8
 
 # Run command line with python 
 %runscript
-    python "$@"
+    python3 "$@"
