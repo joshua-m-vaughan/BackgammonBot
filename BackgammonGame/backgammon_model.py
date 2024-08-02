@@ -13,7 +13,7 @@ from copy import deepcopy
 from queue import LifoQueue
 import random
 from ExtendedFormGame.template import GameState, GameRules, Action
-from backgammon_tree import PlayNode
+from BackgammonGame.backgammon_tree import PlayNode
 import numpy as np
 
 # CONSTANTS ---------------------------------------------------------- #

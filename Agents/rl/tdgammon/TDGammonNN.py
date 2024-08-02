@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 
 from Agents.rl.template.qfunction import QFunction
-from backgammon_model import BackgammonState, generate_td_gammon_vector
+from BackgammonGame.backgammon_model import BackgammonState, generate_td_gammon_vector
 
 # CONSTANTS ---------------------------------------------------------- #
 

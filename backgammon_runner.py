@@ -16,14 +16,14 @@ from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
 from Agents.rl.template.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
-from backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules
+from BackgammonGame.backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules
 from ExtendedFormGame.Game import Game
 from Agents.generic.random import myAgent as RandomAgent
 from datetime import datetime, timedelta
 import random
 import re
 
-from supportils import initialise_results, checkpoint_results, save_results, time_print
+from BackgammonGame.supportils import initialise_results, checkpoint_results, save_results, time_print
 
 # CONSTANTS ---------------------------------------------------------- #
 

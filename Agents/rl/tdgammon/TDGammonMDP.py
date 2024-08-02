@@ -13,7 +13,7 @@
 
 from Agents.rl.template.mdp import MDP
 from Agents.rl.template.qfunction import QFunction
-from backgammon_model import BackgammonRules, BackgammonState
+from BackgammonGame.backgammon_model import BackgammonRules, BackgammonState
 
 # CONSTANTS ---------------------------------------------------------- #
 
