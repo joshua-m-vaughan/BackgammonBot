@@ -103,7 +103,7 @@ class TDGammonNNQFunction(QFunction):
             to save Q-function to.
         """
         filepath_str:str = str(PurePosixPath(filepath))
-        checkpoint = torch.load(filepath_str)
+        checkpoint = torch.load(filepath_str, weights_only=True)
         self.nn.load_state_dict(checkpoint["model_state_dict"])
         self.nn.eligibility_traces = checkpoint["eligbility"]
 

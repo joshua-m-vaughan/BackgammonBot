@@ -251,7 +251,7 @@ def eval(agent_path:list[str], agent_names:list[str],
     for i in range(num_agents):
         if type(agent_list[i]) is InferenceAgent:
             # TD Gammon NN Qfunction provided.
-            if re.search(r"(Agents\\rl\\tdgammon\\trained_models\\)(.*)", model_path[i]):
+            if re.search(r"(Agents/rl/tdgammon/trained_models/)(.*)", model_path[i]):
                 agent_list[i].qfunction = TDGammonNNQFunction()
                 agent_list[i].qfunction.load_policy(model_path[i])
             else:
@@ -328,6 +328,6 @@ if __name__ == "__main__":
 
     # Example options:
     # --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
-    # --eval --name tdgammon0_0_eval_test --episodes 5 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240730-1656_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240730-1656_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
+    # --eval --name tdgammon0_0_eval_test --episodes 5 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240801-0018_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240801-0018_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
 
 # END ---------------------------------------------------------------- #
