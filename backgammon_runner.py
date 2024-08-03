@@ -327,7 +327,7 @@ if __name__ == "__main__":
     exit()
 
     # Example options:
-    # --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
-    # --eval --name tdgammon0_0_eval_test --episodes 5 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240801-0018_tdgammon0_0_selfplay_v1.pt,Agents\rl\tdgammon\trained_models\20240801-0018_tdgammon0_0_selfplay_v1.pt -r "results\\eval"
+    # & C:/Users/joshv/anaconda3/envs/boardgameRL/python.exe c:/Users/joshv/Documents/personal_projects/BackgammonBot/backgammon_runner.py --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
+    # & C:/Users/joshv/anaconda3/envs/boardgameRL/python.exe c:/Users/joshv/Documents/personal_projects/BackgammonBot/backgammon_runner.py --eval --name tdgammon0_0_eval_test --episodes 5 -a rl.template.inference,rl.template.inference --agent_names tdg00_v1,tdg00_v2 --models Agents\rl\tdgammon\trained_models\20240801-0750_tdgammon0_0_selfplay_cpu15000.pt,Agents\rl\tdgammon\trained_models\20240801-0750_tdgammon0_0_selfplay_cpu15000.pt -r results/eval/
 
 # END ---------------------------------------------------------------- #
