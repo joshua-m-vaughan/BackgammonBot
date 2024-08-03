@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=bg_bot_train_$1                                      # Job name
+#SBATCH --job-name=bg_bot_evalgpu_$1                                    # Job name
 #SBATCH --mail-user=jmv132@stanford.edu                                 # Email address
 #SBATCH --mail-type=NONE                                                # Mail notification type (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --partition=normal                                              # Node partition
@@ -10,4 +10,4 @@
 #SBATCH --partition=gpu_pascal                                          # GPU node to run on
 
 # Execute training script in boardgame container.
-apptainer run ./python311_boardgame ./backgammon_runner.py --train --name tdgammon0_0_selfplay --episodes $1 --duration 4 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_$1_1,tdg00_$1_2 -r $2
+apptainer run ./python311_boardgame ./backgammon_runner.py --eval --name tdgammon0_0_eval --episodes $1 --duration 4 --set_seed $2 -a rl.template.inference,rl.template.inference --agent_names tdg00_$1_1,tdg00__$1_2 --models $3,$4 -r $5
