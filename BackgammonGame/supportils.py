@@ -34,12 +34,12 @@ def checkpoint_results(matches:dict, history:dict,
                        episode:int, elapsed:timedelta) -> dict:
     # Store the history trace.
     # NOTE: Evaluate whether I could setup a MongoDB with PyMongo.
-    filename:str = file_time + "_" + name + "_" + str(episode) + ".json"
-    filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
-    filepath_str:str = str(PurePosixPath(filepath))
-    with open(filepath_str, "w") as file:
-        serialised = {str(key): value for key, value in history.items()}
-        json.dump(serialised, file, indent=JSON_INDENT)
+    #filename:str = file_time + "_" + name + "_" + str(episode) + ".json"
+    #filepath:PureWindowsPath = PureWindowsPath(results_path, filename)
+    #filepath_str:str = str(PurePosixPath(filepath))
+    #with open(filepath_str, "w") as file:
+    #    serialised = {str(key): value for key, value in history.items()}
+    #    json.dump(serialised, file, indent=JSON_INDENT)
 
     # Store training-level results.
     game:dict = dict()
