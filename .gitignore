@@ -166,4 +166,4 @@ cython_debug/
 
 # Results files
 results/
-sh_scripts/sbatch_logs/
+/sh_scripts/sbatch_logs/
