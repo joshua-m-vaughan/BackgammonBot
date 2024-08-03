@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=bg_bot_train_$1                                      # Job name
+#SBATCH --job-name=bg_bot_gputrain_$1                                   # Job name
 #SBATCH --mail-user=jmv132@stanford.edu                                 # Email address
 #SBATCH --mail-type=NONE                                                # Mail notification type (NONE, BEGIN, END, FAIL, ALL)
 #SBATCH --partition=normal                                              # Node partition
