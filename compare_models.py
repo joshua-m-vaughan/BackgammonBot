@@ -8,21 +8,17 @@ TD5000:str = "20240801-1949_tdgammon0_0_selfplay_gpu5000.pt"
 TD10000:str = "20240802-2027_tdgammon0_0_selfplay_cpu10000.pt"
 TD15000:str = "20240801-0750_tdgammon0_0_selfplay_cpu15000.pt"
 
+REV_5:str = "20240805-1456_debug.pt"
+REV_20:str = "20240805-1457_debug.pt"
+
+PATHS = [REV_5, REV_20]
 
 if __name__ == "__main__":
-    agent_1000 = myAgent(0)
-    agent_1000.qfunction.load_policy(Path(myAgent(0).policy_path, TD1000))
 
-    agent_5000 = myAgent(1)
-    agent_5000.qfunction.load_policy(Path(myAgent(0).policy_path, TD5000))
-    
-    agent_10000 = myAgent(2)
-    agent_10000.qfunction.load_policy(Path(myAgent(0).policy_path, TD10000))
-
-    agent_15000 = myAgent(3)
-    agent_15000.qfunction.load_policy(Path(myAgent(0).policy_path, TD15000))
-
-    agents = [agent_1000, agent_5000, agent_10000, agent_15000]
+    agents = []
+    for i in range(len(PATHS)):
+        agents.append(myAgent(i))
+        agents[i].qfunction.load_policy(Path(myAgent.policy_path, PATHS[i]))
 
     for (agent_i, agent_j) in itertools.combinations(agents, 2):
             equality = True
