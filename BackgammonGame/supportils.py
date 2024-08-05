@@ -7,8 +7,7 @@ import random
 
 JSON_INDENT:int = 4 # One tab
 
-def initialise_results(agent_path:list[str], agent_names:list[str],
-                       model_path:list[str], seed:int) -> dict:
+def initialise_results(agent_path:list[str], agent_names:list[str], seed:int) -> dict:
     # Initialise matches dictionary.
     matches:dict = dict()
     matches.update({"seed":seed})
