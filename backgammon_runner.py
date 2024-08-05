@@ -170,7 +170,7 @@ def train(agent_path:list[str], agent_names:list[str],
                        tmp_seed)
         
         # Run game.
-        history, end_game_state = bg_game.run()
+        history = bg_game.run()
 
         # Update agents weights based on outcome of the game.
         # TODO: NOTE: Very unsure about how to implement this.
@@ -330,7 +330,7 @@ if __name__ == "__main__":
           results_path=["results/train/test"],
           training_name="debug",
           seed=SEED,
-          max_episodes=1)
+          max_episodes=5)
 
     # Example options:
     # & C:/Users/joshv/anaconda3/envs/boardgameRL/python.exe c:/Users/joshv/Documents/personal_projects/BackgammonBot/backgammon_runner.py --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
