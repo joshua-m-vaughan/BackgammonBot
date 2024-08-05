@@ -72,9 +72,9 @@ class TDGammonNNQFunction(QFunction):
             agent_id (int): Integer representing agent id.
         """
         # Determine the delta.
-        delta:float = (reward + (gamma *
-                                 (self.get_q_value(game_state_p, None)
-                                  - self.get_q_value(game_state, None))))
+        delta:float = (reward
+                       + (gamma * self.get_q_value(game_state_p, None))
+                       - self.get_q_value(game_state, None))
         
         # Update the weights.
         #NOTE: Improve efficiency by removing duplication of vectorisation.

@@ -59,13 +59,16 @@ class OffPolicyTDAgent(Agent):
             action:tuple = self.bandit.select_action(game_state, actions)
 
             # Observe reward
-            reward:list[float] = self.mdp.get_reward(self.last_state,
-                                                     game_state,
+            next_game_state = self.mdp.get_next_state(game_state, action, self.id)
+            next_actions = self.mdp.get_actions(next_game_state, next_game_state.current_agent_id)
+            reward:list[float] = self.mdp.get_reward(game_state,
+                                                     next_game_state,
                                                      action,
                                                      self.id)
             
             # Update Q-function using off-policy approach.
-            self.qfunction.update(self.last_state, game_state, actions,
+
+            self.qfunction.update(game_state, next_game_state, next_actions,
                                   reward, self.mdp.gamma, self.id)
 
         # Update state, action storage for learning.
