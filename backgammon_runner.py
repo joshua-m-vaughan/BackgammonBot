@@ -299,38 +299,31 @@ def eval(agent_path:list[str], agent_names:list[str],
 # MAIN --------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    # options = load_parameters()
-    # time_print(str(options))
+    options = load_parameters()
+    time_print(str(options))
     
-    # # Fill in instances.
-    # agent_path:list[str] = str(options.agents).split(",")
-    # agent_names:list[str] = str(options.agent_names).split(",")
-    # model_path:list[str] = str(options.models).split(",")
-    # wtl:float = options.wtl
-    # num_warnings:int = options.num_warnings
-    # random.seed(options.set_seed)
-    # results_path:PureWindowsPath = PureWindowsPath(options.results)
+    # Fill in instances.
+    agent_path:list[str] = str(options.agents).split(",")
+    agent_names:list[str] = str(options.agent_names).split(",")
+    model_path:list[str] = str(options.models).split(",")
+    wtl:float = options.wtl
+    num_warnings:int = options.num_warnings
+    random.seed(options.set_seed)
+    results_path:PureWindowsPath = PureWindowsPath(options.results)
 
-    # name:str = options.name
-    # max_episodes:int = options.episodes
-    # max_duration:int = options.duration
+    name:str = options.name
+    max_episodes:int = options.episodes
+    max_duration:int = options.duration
 
-    # # Determine run-time.
-    # if options.train:
-    #     train(agent_path, agent_names, results_path, name,
-    #           options.set_seed, max_episodes, max_duration)
-    # elif options.eval:
-    #     eval(agent_path, agent_names, model_path, results_path,
-    #          name, options.set_seed, max_episodes, max_duration)
+    # Determine run-time.
+    if options.train:
+        train(agent_path, agent_names, results_path, name,
+              options.set_seed, max_episodes, max_duration)
+    elif options.eval:
+        eval(agent_path, agent_names, model_path, results_path,
+             name, options.set_seed, max_episodes, max_duration)
 
-    # exit()
-
-    train(agent_path=["rl.tdgammon.TDGammon0_0", "rl.tdgammon.TDGammon0_0"],
-          agent_names=["tdg0_1", "tdg0_2"],
-          results_path=["results/train/test"],
-          training_name="debug",
-          seed=SEED,
-          max_episodes=5)
+    exit()
 
     # Example options:
     # & C:/Users/joshv/anaconda3/envs/boardgameRL/python.exe c:/Users/joshv/Documents/personal_projects/BackgammonBot/backgammon_runner.py --train --name tdgammon0_0_selfplay --episodes 5 -a rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0 --agent_names tdg00_1,tdg00_2
