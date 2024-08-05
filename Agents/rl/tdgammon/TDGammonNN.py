@@ -103,7 +103,7 @@ class TDGammonNNQFunction(QFunction):
             to save Q-function to.
         """
         filepath_str:str = str(PurePosixPath(filepath))
-        checkpoint = torch.load(filepath_str, weights_only=True)
+        checkpoint = torch.load(filepath_str)
         self.nn.load_state_dict(checkpoint["model_state_dict"])
         self.nn.eligibility_traces = checkpoint["eligbility"]
 
@@ -183,7 +183,7 @@ class TDGammonNN(nn.Module):
             for i, weights in enumerate(parameters):
                 # Compute eligbility traces:
                 # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
-                self.eligibility_traces[i] = (torch.Tensor((gamma * self.lamda * self.eligibility_traces[i]))
+                self.eligibility_traces[i] = ((gamma * self.lamda * self.eligibility_traces[i])
                                               + weights.grad)
 
                 # Parameter Update:
