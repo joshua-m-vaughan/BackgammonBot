@@ -94,8 +94,8 @@ TBC.
 
 ## References
 
-[1]: Van Lishout, François & Chaslot, Guillaume & Uiterwijk, Jos. (2007). Monte-Carlo tree search in backgammon. Computer Games Workshop.
+[1]: Van Lishout, François & Chaslot, Guillaume & Uiterwijk, Jos. (2007). *Monte-Carlo tree search in backgammon*. Computer Games Workshop.
 
-[2]: Berliner, Hans J. (1977) BKG -- A Program that plays Backgammon. Carnegie-Mellon University.
+[2]: Berliner, Hans J. (1977) *BKG -- A Program that plays Backgammon*. Carnegie-Mellon University.
 
-[3]: Backgammon Galore! Rules of Backgammon. <https://www.bkgm.com/rules.html> (accessed on 21 July 2024)
+[3]: Backgammon Galore! (2024) *Rules of Backgammon*. <https://www.bkgm.com/rules.html> (accessed on 21 July 2024)
