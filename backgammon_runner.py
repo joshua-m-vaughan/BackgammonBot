@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 import random
 import re
 
-from BackgammonGame.supportils import initialise_results, checkpoint_results, save_results, time_print
+from BackgammonGame.utils import initialise_results, checkpoint_results, save_results, time_print
 
 # CONSTANTS ---------------------------------------------------------- #
 
