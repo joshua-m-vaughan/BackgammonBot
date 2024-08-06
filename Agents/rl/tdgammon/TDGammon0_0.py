@@ -65,8 +65,8 @@ class myAgent(Agent):
             action:tuple = self.qfunction.get_arg_max(game_state, actions)
 
             # Observe reward
-            next_game_state = self.mdp.get_next_state(game_state, action, self.id)
-            next_actions = self.mdp.get_actions(next_game_state, next_game_state.current_agent_id)
+            next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
+            next_actions:list[tuple] = self.mdp.get_actions(next_game_state, next_game_state.current_agent_id)
             reward:list[float] = self.mdp.get_reward(game_state,
                                                      next_game_state,
                                                      action,
