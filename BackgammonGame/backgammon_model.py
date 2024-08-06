@@ -71,6 +71,9 @@ class BackgammonState(GameState):
         self.current_agent_id = agent_id
 
         # Initialise the board state attributes.
+        # TODO: Remove the Lishout representation to take advantage of
+        # modern data structures (e.g. a dictionary indexed on ID storing the lists).
+        # This will reduced the duplicate specifications in the model below.
         self.points_content = [0] * 26
         self.black_checkers = []
         self.white_checkers = []
