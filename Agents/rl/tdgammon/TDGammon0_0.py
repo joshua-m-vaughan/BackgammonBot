@@ -23,7 +23,7 @@ from ExtendedFormGame.template import Agent
 
 # CONSTANTS ---------------------------------------------------------- #
 
-TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
+TD_ALPHA:float = 0.01 # As defined in Tesauro paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 
 # CLASS DEF ---------------------------------------------------------- #  
