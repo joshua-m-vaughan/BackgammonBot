@@ -9,7 +9,10 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/backgammon_runner.py",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": ["--train", "--name", "tdg_debug", "--episodes",
+                    "1", "-a", "rl.tdgammon.TDGammon0_0,rl.tdgammon.TDGammon0_0",
+                    "--agent_names", "tdg00_1,tdg00_2"]
         }
     ]
 }
