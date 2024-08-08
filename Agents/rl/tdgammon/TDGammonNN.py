@@ -58,7 +58,7 @@ class TDGammonNNQFunction(QFunction):
         # FOR COMPARISON PURPOSES.
 
     def update(self, game_state:BackgammonState, game_state_p:BackgammonState,
-               actions:list[tuple], reward:float, gamma:float,
+               actions_p:list[tuple], reward:float, gamma:float,
                agent_id:int) -> None:
         """update
         Updates the Q-value at a particular moment in the game.
@@ -66,7 +66,7 @@ class TDGammonNNQFunction(QFunction):
         Args:
             game_state (GameState): State s
             game_state_p (GameState): State s'
-            action (Action): Action a
+            actions_p (list[tuple]): Actions in A'.
             reward (list[float]): List for the reward for each agent.
             gamma (float): Float for the gamma
             agent_id (int): Integer representing agent id.
