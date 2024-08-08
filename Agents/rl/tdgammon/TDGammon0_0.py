@@ -12,7 +12,6 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from re import A
 from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction 
 from BackgammonGame.backgammon_model import BackgammonRules, BackgammonState
