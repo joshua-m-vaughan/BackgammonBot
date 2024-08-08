@@ -64,7 +64,7 @@ class myAgent(Agent):
 
         for a in actions:
             tmp_game_state_p:BackgammonState = self.mdp.get_next_state(game_state, a, self.id)
-            tmp_value:float = self.qfunction.get_q_value(tmp_game_state_p, None)
+            tmp_value:float = self.qfunction.get_q_value(tmp_game_state_p, None)[self.id]
             if tmp_value > max_value:
                 max_value = tmp_value
                 max_actions = [a]
@@ -76,10 +76,6 @@ class myAgent(Agent):
         # Update Q-Function.
         next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
         reward:float = self.mdp.get_reward(game_state, next_game_state, action, self.id)
-        if reward == [1,0]:
-            print("Rewarding BLACK") #DEBUG
-        elif reward == [0,1]:
-            print("Rewarding WHITE") #DEBUG
         self.qfunction.update(game_state, next_game_state, None,
                                   reward, self.mdp.gamma, self.id)
 

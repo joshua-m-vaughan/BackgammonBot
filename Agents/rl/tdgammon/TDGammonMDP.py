@@ -31,7 +31,7 @@ class TDGammonMDP(MDP):
 
     def get_reward(self, game_state:BackgammonState,
                    game_state_p:BackgammonState,
-                  action:tuple, agent_id:int) -> list[float]:
+                   action:tuple, agent_id:int) -> float:
         """ get_reward
         Return reward for transition from s to s' with action a.
 
@@ -44,12 +44,7 @@ class TDGammonMDP(MDP):
         Returns:
             list[float]: Reward for each agent id, when moving from
             state s to state s'.
-        """
-        reward:list[float] = []
-        for i in range(game_state_p.num_agents):
-            tmp_result:float = float(self.game_rules.calculate_endgame_score(game_state_p, i))
-            reward.append(tmp_result)
-        
-        return reward
+        """       
+        return float(self.game_rules.calculate_endgame_score(game_state_p, agent_id))
 
 # END FILE ----------------------------------------------------------- #

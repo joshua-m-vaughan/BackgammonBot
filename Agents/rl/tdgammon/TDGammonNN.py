@@ -22,11 +22,11 @@ from BackgammonGame.backgammon_model import BackgammonState, generate_td_gammon_
 
 # CONSTANTS ---------------------------------------------------------- #
 
-TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
-TD_LAMDA:float = 0.01 # TO DETERMINE WHAT THIS IS.
+TD_ALPHA:float = 0.01 # As defined in Tesauro paper.
+TD_LAMDA:float = 0.70 # As defined in Tesauro paper.
 NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
-NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
+NUM_TDGAMMON_OUTPUT:int = 2 # As defined, by Tesauro's paper. #HACK: This doesn't not include the gammon winning implementation which I haven't considered in the simulator.
 
 # CLASS DEF ---------------------------------------------------------- #      
 
@@ -53,7 +53,8 @@ class TDGammonNNQFunction(QFunction):
             float: Q-value
         """
         game_vector:np.array = generate_td_gammon_vector(game_state)
-        return self.nn.forward(game_vector).detach().numpy()[0]
+        output = self.nn.forward(game_vector).detach().numpy()
+        return output
         # NOTE: THIS MIGHT NEED TO BE UPDATED TO REFLECT A SINGULAR FLOAT VALUE
         # FOR COMPARISON PURPOSES.
 
@@ -73,14 +74,16 @@ class TDGammonNNQFunction(QFunction):
         """
         # Determine the delta.
         delta:float = (reward
-                       + (gamma * self.get_q_value(game_state_p, None))
-                       - self.get_q_value(game_state, None))
+                       + (gamma * self.get_q_value(game_state_p, None)[agent_id])
+                       - self.get_q_value(game_state, None)[agent_id])
         
         # Update the weights.
         #NOTE: Improve efficiency by removing duplication of vectorisation.
         game_vec:np.array = generate_td_gammon_vector(game_state)
+        game_vec_p:np.array = generate_td_gammon_vector(game_state_p)
         self.nn.update_weights(self.nn.forward(game_vec),
-                               self.alpha, gamma, delta[agent_id])
+                               self.nn.forward(game_vec_p),
+                               self.alpha, gamma, delta)
 
 
     def save_policy(self, filepath:PureWindowsPath) -> None:
@@ -143,7 +146,10 @@ class TDGammonNN(nn.Module):
         # Initialise eligbility traces.
         self.lamda:float = lamda
         self.eligibility_traces:list = [torch.zeros(weights.shape, requires_grad=False) for weights in list(self.parameters())]
-    
+
+        # Define loss function.
+        self.loss = nn.MSELoss()
+
     # NOTE: Overriding method.
     def forward(self, x):
         """forward
@@ -157,7 +163,8 @@ class TDGammonNN(nn.Module):
         x = self.output(x)
         return x
     
-    def update_weights(self, output:torch.Tensor,
+    def update_weights(self, prediction:torch.Tensor,
+                       target:torch.Tensor,
                        alpha:float,
                        gamma:float,
                        delta:float) -> None:
@@ -174,6 +181,7 @@ class TDGammonNN(nn.Module):
         self.zero_grad()
 
         # Compute the derivative of the output w.r.t. the parameters.
+        output = self.loss(prediction, target)
         output.backward()
 
         with torch.no_grad():
