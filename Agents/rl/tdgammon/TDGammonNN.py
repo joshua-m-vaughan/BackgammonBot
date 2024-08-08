@@ -11,7 +11,6 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from copy import deepcopy
 from pathlib import PurePosixPath, PureWindowsPath
 import numpy as np
 import torch
@@ -193,10 +192,8 @@ class TDGammonNN(nn.Module):
         output.backward()
 
         with torch.no_grad():
-            # Get parameters of the model.
-            parameters = list(self.parameters())
-
-            for i, weights in enumerate(parameters):
+            i:int = 0
+            for param in self.parameters():
                 # Compute eligbility traces:
                 # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
                 # NOTE: I HAVE NOT BEEN ABLE TO UPDATE THE ETRACES AND
@@ -207,15 +204,17 @@ class TDGammonNN(nn.Module):
                 # THEREFORE, WE NEED TO ENFORCE THAT WHEN WE SEE AN END
                 # STATE, WE DO NOT USE THE VALUE FUNCTION, AND PROVIDE
                 # THE RELEVANT VALUE INTO THE TENSOR.
-                #print(weights.grad)
                 self.eligibility_traces[i] = ((gamma * self.lamda * self.eligibility_traces[i])
-                                              + weights.grad)
+                                              + param.grad)
 
                 # Parameter Update:
                 # theta <- theta + (alpha * delta * gradient of Q-function)
-                new_weights = (weights +
-                               (alpha * delta * self.eligibility_traces[i]))
-                weights = deepcopy(new_weights)
+                # NOTE: .copy_ method allows for the inplace update of
+                # the parameters, instead of previous approaches, which
+                # were unable to do this.
+                param.copy_(param +
+                            (alpha * delta * self.eligibility_traces[i]))
+                i+=1
 
 
 # END FILE ----------------------------------------------------------- #
