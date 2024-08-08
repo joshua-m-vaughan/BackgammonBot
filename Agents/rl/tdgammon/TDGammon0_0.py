@@ -75,6 +75,8 @@ class myAgent(Agent):
         # Update Q-Function.
         next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
         reward:float = self.mdp.get_reward(game_state, next_game_state, action, self.id)
+        if reward == 1:
+            print("reward winning")
         self.qfunction.update(game_state, next_game_state, None,
                                   reward, self.mdp.gamma, self.id)
 
