@@ -12,6 +12,7 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
+from re import A
 from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction 
 from BackgammonGame.backgammon_model import BackgammonRules, BackgammonState
@@ -57,23 +58,29 @@ class myAgent(Agent):
             Action: Selected action instance.
         """
 
-        if self.turn == 0:
-            # First action: randomly select an action.
-            action:tuple = random.choice(actions)
-        else:
-            # Subsequent action: Bandit select next action.
-            action:tuple = self.qfunction.get_arg_max(game_state, actions)
+        # Select the highest estimated outcome state value.
+        max_value:float = float("-inf")
+        max_actions:list[tuple] = []
 
-            # Observe reward
-            next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
-            next_actions:list[tuple] = self.mdp.get_actions(next_game_state, next_game_state.current_agent_id)
-            reward:list[float] = self.mdp.get_reward(game_state,
-                                                     next_game_state,
-                                                     action,
-                                                     self.id)
-            
-            # Update Q-function using off-policy approach.
-            self.qfunction.update(game_state, next_game_state, next_actions,
+        for a in actions:
+            tmp_game_state_p:BackgammonState = self.mdp.get_next_state(game_state, a, self.id)
+            tmp_value:float = self.qfunction.get_q_value(tmp_game_state_p, None)
+            if tmp_value > max_value:
+                max_value = tmp_value
+                max_actions = [a]
+            elif tmp_value == max_value:
+                max_actions.append(a)
+
+        action:tuple = random.choice(max_actions)
+
+        # Update Q-Function.
+        next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
+        reward:float = self.mdp.get_reward(game_state, next_game_state, action, self.id)
+        if reward == [1,0]:
+            print("Rewarding BLACK") #DEBUG
+        elif reward == [0,1]:
+            print("Rewarding WHITE") #DEBUG
+        self.qfunction.update(game_state, next_game_state, None,
                                   reward, self.mdp.gamma, self.id)
 
         # Update turn.
