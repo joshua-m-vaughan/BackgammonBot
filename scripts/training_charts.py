@@ -4,9 +4,9 @@ import json
 import matplotlib.pyplot as plt
 import datetime
 
-FOLDER_PATH:str = "results/train"
-CPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "20240810-1133_tdg_debug_matches.json")
-GPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "20240810-1315_tdgammon0_0_selfplay_matches.json")
+FOLDER_PATH:str = "results/train/presentation_results"
+CPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "")
+GPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "20240810-1001_tdg00_sp_gpu100_matches.json")
 
 episode_dict = dict()
 training_name = ["CPU", "GPU"]
