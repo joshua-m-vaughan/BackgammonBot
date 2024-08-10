@@ -11,22 +11,21 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from copy import deepcopy
 from pathlib import PurePosixPath, PureWindowsPath
 import numpy as np
 import torch
 import torch.nn as nn
 
 from Agents.rl.template.qfunction import QFunction
-from BackgammonGame.backgammon_model import BackgammonState, generate_td_gammon_vector
+from BackgammonGame.backgammon_model import BackgammonRules, BackgammonState, generate_td_gammon_vector
 
 # CONSTANTS ---------------------------------------------------------- #
 
-TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
-TD_LAMDA:float = 0.01 # TO DETERMINE WHAT THIS IS.
+TD_ALPHA:float = 0.01 # As defined in Tesauro paper.
+TD_LAMDA:float = 0.70 # As defined in Tesauro paper.
 NUM_TDGAMMON_FEATURES:int = 198 # As defined, by Tesauro's paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
-NUM_TDGAMMON_OUTPUT:int = 1 # As defined, by Tesauro's paper.
+NUM_TDGAMMON_OUTPUT:int = 2 # As defined, by Tesauro's paper. #HACK: This doesn't not include the gammon winning implementation which I haven't considered in the simulator.
 
 # CLASS DEF ---------------------------------------------------------- #      
 
@@ -39,9 +38,10 @@ class TDGammonNNQFunction(QFunction):
         
         super().__init__(alpha)
         self.nn:TDGammonNN = TDGammonNN(hidden_features, lamda)
+        self.gr:BackgammonRules = BackgammonRules()
         
     def get_q_value(self, game_state:BackgammonState,
-                    action:tuple) -> float:
+                    action:tuple) -> torch.Tensor:
         """ get_q_value
         Return Q-value for action,game_state pair.
 
@@ -52,13 +52,19 @@ class TDGammonNNQFunction(QFunction):
         Returns:
             float: Q-value
         """
-        game_vector:np.array = generate_td_gammon_vector(game_state)
-        return self.nn.forward(game_vector).detach().numpy()[0]
-        # NOTE: THIS MIGHT NEED TO BE UPDATED TO REFLECT A SINGULAR FLOAT VALUE
-        # FOR COMPARISON PURPOSES.
+        if self.gr.game_ends(game_state):
+            # NOTE: Game ends so we need to use exact result from
+            # winning the game not the estimated value.
+            output = np.zeros(self.gr.num_agents)
+            for i in range(self.gr.num_agents):
+                output[i] = self.gr.calculate_endgame_score(game_state, i)
+        else:
+            game_vector:np.array = generate_td_gammon_vector(game_state)
+            output = self.nn.forward(game_vector).detach().numpy()
+        return output
 
     def update(self, game_state:BackgammonState, game_state_p:BackgammonState,
-               actions:list[tuple], reward:float, gamma:float,
+               actions_p:list[tuple], reward:float, gamma:float,
                agent_id:int) -> None:
         """update
         Updates the Q-value at a particular moment in the game.
@@ -66,21 +72,25 @@ class TDGammonNNQFunction(QFunction):
         Args:
             game_state (GameState): State s
             game_state_p (GameState): State s'
-            action (Action): Action a
+            actions_p (list[tuple]): Actions in A'.
             reward (list[float]): List for the reward for each agent.
             gamma (float): Float for the gamma
             agent_id (int): Integer representing agent id.
         """
         # Determine the delta.
+        val = self.get_q_value(game_state, None)
+        val_p = self.get_q_value(game_state_p, None)
         delta:float = (reward
-                       + (gamma * self.get_q_value(game_state_p, None))
-                       - self.get_q_value(game_state, None))
+                       + (gamma * val_p[agent_id])
+                       - val[agent_id])
         
         # Update the weights.
-        #NOTE: Improve efficiency by removing duplication of vectorisation.
-        game_vec:np.array = generate_td_gammon_vector(game_state)
-        self.nn.update_weights(self.nn.forward(game_vec),
-                               self.alpha, gamma, delta[agent_id])
+        gs_vec = generate_td_gammon_vector(game_state)
+        val_t = self.nn.forward(gs_vec)
+        val_p_t = torch.Tensor(val_p)
+        #val_p_t.requires_grad = True
+        self.nn.update_weights(val_t, val_p_t,
+                               self.alpha, gamma, delta)
 
 
     def save_policy(self, filepath:PureWindowsPath) -> None:
@@ -143,7 +153,10 @@ class TDGammonNN(nn.Module):
         # Initialise eligbility traces.
         self.lamda:float = lamda
         self.eligibility_traces:list = [torch.zeros(weights.shape, requires_grad=False) for weights in list(self.parameters())]
-    
+
+        # Define loss function.
+        self.loss = nn.MSELoss()
+
     # NOTE: Overriding method.
     def forward(self, x):
         """forward
@@ -157,7 +170,8 @@ class TDGammonNN(nn.Module):
         x = self.output(x)
         return x
     
-    def update_weights(self, output:torch.Tensor,
+    def update_weights(self, prediction:torch.Tensor,
+                       target:torch.Tensor,
                        alpha:float,
                        gamma:float,
                        delta:float) -> None:
@@ -174,22 +188,33 @@ class TDGammonNN(nn.Module):
         self.zero_grad()
 
         # Compute the derivative of the output w.r.t. the parameters.
+        output = self.loss(prediction, target)
         output.backward()
 
         with torch.no_grad():
-            # Get parameters of the model.
-            parameters = list(self.parameters())
-
-            for i, weights in enumerate(parameters):
+            i:int = 0
+            for param in self.parameters():
                 # Compute eligbility traces:
                 # e_t = (gamma * delta e_t-1) + (gradient of weights w.r.t. output)
+                # NOTE: I HAVE NOT BEEN ABLE TO UPDATE THE ETRACES AND
+                # IN TURN THE WEIGHTS, BECAUSE THERE IS NEVER A GRADIENT
+                # ON THE WEIGHTS. THE V_T+1 IS ALWAYS EQUAL TO V_T
+                # BECAUSE THEY ARE BOTH FROM THE SAME MODEL, WITH NOW
+                # EXTERNAL IMPACT ON WHETHER TO UPDATE THE VALUE FUNCTION.
+                # THEREFORE, WE NEED TO ENFORCE THAT WHEN WE SEE AN END
+                # STATE, WE DO NOT USE THE VALUE FUNCTION, AND PROVIDE
+                # THE RELEVANT VALUE INTO THE TENSOR.
                 self.eligibility_traces[i] = ((gamma * self.lamda * self.eligibility_traces[i])
-                                              + weights.grad)
+                                              + param.grad)
 
                 # Parameter Update:
                 # theta <- theta + (alpha * delta * gradient of Q-function)
-                new_weights = (weights +
-                               (alpha * delta * self.eligibility_traces[i]))
-                weights = deepcopy(new_weights)
+                # NOTE: .copy_ method allows for the inplace update of
+                # the parameters, instead of previous approaches, which
+                # were unable to do this.
+                param.copy_(param +
+                            (alpha * delta * self.eligibility_traces[i]))
+                i+=1
+
 
 # END FILE ----------------------------------------------------------- #

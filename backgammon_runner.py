@@ -12,13 +12,13 @@ from pathlib import PurePosixPath, PureWindowsPath
 import sys
 import traceback
 from importlib import import_module
-from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
-from Agents.rl.template.inference import myAgent as InferenceAgent
+from Agents.rl.tdgammon.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
 from BackgammonGame.backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules
 from ExtendedFormGame.Game import Game
 from Agents.generic.random import myAgent as RandomAgent
+from Agents.rl.tdgammon.TDGammon0_0 import myAgent as TDGAgent
 from datetime import datetime, timedelta
 import random
 import re
@@ -144,8 +144,8 @@ def train(agent_path:list[str], agent_names:list[str],
     (agent_list, valid_game) = load_agent(agent_path)
     # Self-play game between TD Agents.
     if (agent_path[BLACK_ID] == agent_path[WHITE_ID]
-        and type(agent_path[BLACK_ID]) is OffPolicyTDAgent
-        and type(agent_path[WHITE_ID]) is OffPolicyTDAgent):
+        and type(agent_list[BLACK_ID]) is TDGAgent
+        and type(agent_list[WHITE_ID]) is TDGAgent):
         # Both agents reference the same Q-Function.
         agent_list[WHITE_ID].qfunction = agent_list[BLACK_ID].qfunction
         assert(id(agent_list[WHITE_ID].qfunction) == id(agent_list[BLACK_ID].qfunction))
@@ -233,8 +233,7 @@ def eval(agent_path:list[str], agent_names:list[str],
     random.seed(seed)
 
     # Initialise matches dictionary.
-    matches:dict = initialise_results(agent_path, agent_names,
-                                      model_path, seed)
+    matches:dict = initialise_results(agent_path, agent_names, seed)
 
     # Create agents.
     time_print("Creating agents...")

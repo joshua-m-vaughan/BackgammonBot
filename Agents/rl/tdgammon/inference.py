@@ -7,8 +7,12 @@
 
 # IMPORTS ------------------------------------------------------------ #
 
-from Agents.rl.template.qfunction import QFunction
-from ExtendedFormGame.template import Agent, GameState
+import random
+from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
+from Agents.rl.tdgammon.TDGammonMDP import TDGammonMDP
+from BackgammonGame.backgammon_model import BackgammonState, BackgammonRules
+from ExtendedFormGame.template import Agent
+
 
 # CONSTANTS ---------------------------------------------------------- #
 
@@ -23,10 +27,12 @@ class myAgent(Agent):
         super().__init__(_id)
     
         # Define data structures to support off-policy TD learning.
-        self.qfunction:QFunction = None
+        self.qfunction:TDGammonNNQFunction = None
+        self.game_rules:BackgammonRules = BackgammonRules()
+        self.mdp:TDGammonMDP = TDGammonMDP(self.qfunction, self.game_rules)
         self.turn:int = 0
 
-    def select_action(self, game_state:GameState,
+    def select_action(self, game_state:BackgammonState,
                       actions:list[tuple]) -> tuple:
         """select_action
         Given a set of available actions for the agent to execute, and
@@ -40,6 +46,22 @@ class myAgent(Agent):
         Returns:
             Action: Selected action instance.
         """
-        return self.qfunction.get_arg_max(game_state, actions)     
+        # Turn on eval mode.
+        self.qfunction.nn.eval()
+
+        # Select the highest estimated outcome state value.
+        max_value:float = float("-inf")
+        max_actions:list[tuple] = []
+
+        for a in actions:
+            tmp_game_state_p:BackgammonState = self.mdp.get_next_state(game_state, a, self.id)
+            tmp_value:float = self.qfunction.get_q_value(tmp_game_state_p, None)[self.id]
+            if tmp_value > max_value:
+                max_value = tmp_value
+                max_actions = [a]
+            elif tmp_value == max_value:
+                max_actions.append(a)
+
+        return random.choice(max_actions)  
 
 # END ---------------------------------------------------------------- #

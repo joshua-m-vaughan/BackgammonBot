@@ -23,7 +23,7 @@ from ExtendedFormGame.template import Agent
 
 # CONSTANTS ---------------------------------------------------------- #
 
-TD_ALPHA:float = 0.7 # As defined in Tesauro paper.
+TD_ALPHA:float = 0.01 # As defined in Tesauro paper.
 NUM_TDGAMMON1_HIDDEN:int = 40 # As defined, by Tesauro's paper.
 
 # CLASS DEF ---------------------------------------------------------- #  
@@ -56,24 +56,31 @@ class myAgent(Agent):
         Returns:
             Action: Selected action instance.
         """
+        # Turn on eval mode.
+        self.qfunction.nn.eval()
+        
+        # Select the highest estimated outcome state value.
+        max_value:float = float("-inf")
+        max_actions:list[tuple] = []
 
-        if self.turn == 0:
-            # First action: randomly select an action.
-            action:tuple = random.choice(actions)
-        else:
-            # Subsequent action: Bandit select next action.
-            action:tuple = self.qfunction.get_arg_max(game_state, actions)
+        for a in actions:
+            tmp_game_state_p:BackgammonState = self.mdp.get_next_state(game_state, a, self.id)
+            tmp_value:float = self.qfunction.get_q_value(tmp_game_state_p, None)[self.id]
+            if tmp_value > max_value:
+                max_value = tmp_value
+                max_actions = [a]
+            elif tmp_value == max_value:
+                max_actions.append(a)
 
-            # Observe reward
-            next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
-            next_actions:list[tuple] = self.mdp.get_actions(next_game_state, next_game_state.current_agent_id)
-            reward:list[float] = self.mdp.get_reward(game_state,
-                                                     next_game_state,
-                                                     action,
-                                                     self.id)
-            
-            # Update Q-function using off-policy approach.
-            self.qfunction.update(game_state, next_game_state, next_actions,
+        action:tuple = random.choice(max_actions)
+
+        # Update Q-Function.
+        self.qfunction.nn.train()
+        next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
+        reward:float = self.mdp.get_reward(game_state, next_game_state, action, self.id)
+        if reward == 1:
+            print("reward winning")
+        self.qfunction.update(game_state, next_game_state, None,
                                   reward, self.mdp.gamma, self.id)
 
         # Update turn.

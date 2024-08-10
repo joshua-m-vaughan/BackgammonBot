@@ -88,7 +88,7 @@ class QFunction():
         return random.choice(max_actions)
 
     def update(self, game_state:GameState, game_state_p:GameState,
-               actions:list[tuple], reward:float, gamma:float,
+               actions_p:list[tuple], reward:float, gamma:float,
                agent_id:int) -> None:
         """update
         Updates the Q-value at a particular moment in the game.
@@ -96,7 +96,7 @@ class QFunction():
         Args:
             game_state (GameState): State s
             game_state_p (GameState): State s'
-            action (Action): Action a
+            actions_p (list[tuple]): Actions in A'.
             reward (list[float]): List for the reward for each agent.
             gamma (float): Float for the gamma
             agent_id (int): Integer representing agent id.
