@@ -72,7 +72,7 @@ TBC.
 
 ## Approach
 
-The approach used in the game is the TD-Gammon 0.0 agent framework outlined by Gerald Tesauro in his 1995 paper *Temporal Differenec Learning and TD-Gammon*. From Tesauro's implementation, after training the agent over 500,000 self-play games, the agent was at intermediate-level, and an impressive performance level when released.
+The approach used in the game is the TD-Gammon 0.0 agent framework outlined by Gerald Tesauro in his 1995 paper *Temporal Differenec Learning and TD-Gammon* [[4]](#references). From Tesauro's implementation, after training the agent over 500,000 self-play games, the agent was at intermediate-level, and an impressive performance level when released.
 
 Some notable features of the approach are the following:
 
@@ -105,3 +105,5 @@ TBC.
 [2]: Berliner, Hans J. (1977) *BKG -- A Program that plays Backgammon*. Carnegie-Mellon University.
 
 [3]: Backgammon Galore! (2024) *Rules of Backgammon*. <https://www.bkgm.com/rules.html> (accessed on 21 July 2024)
+
+[4]: Tesauro, G. (1995). *Temporal difference learning and TD-Gammon*. Communications of the ACM, 38(3), 58-68.
