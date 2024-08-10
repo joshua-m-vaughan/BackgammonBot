@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import datetime
 
 FOLDER_PATH:str = "results/train/presentation_results"
-CPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "")
+CPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "20240810-1153_tdg00_sp_cpu500_matches.json")
 GPU_PATH:PurePosixPath = PurePosixPath(FOLDER_PATH, "20240810-1001_tdg00_sp_gpu100_matches.json")
 
 episode_dict = dict()
@@ -32,8 +32,8 @@ for path in RESULTS_PATHS:
 
 
 # Plot Episode duration chart.
-plt.plot(range(1,len(episode_dict[CPU_PATH])+1,1), episode_dict[CPU_PATH], label="CPU")
 plt.plot(range(1,len(episode_dict[GPU_PATH])+1,1), episode_dict[GPU_PATH], label="GPU")
+plt.plot(range(1,len(episode_dict[CPU_PATH])+1,1), episode_dict[CPU_PATH], label="CPU")
 plt.legend()
 plt.xlabel("Episode number")
 plt.ylabel("Episode duration (s)")
