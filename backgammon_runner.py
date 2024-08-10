@@ -12,9 +12,8 @@ from pathlib import PurePosixPath, PureWindowsPath
 import sys
 import traceback
 from importlib import import_module
-from Agents.rl.td.td_offpolicy import OffPolicyTDAgent
 from Agents.rl.tdgammon.TDGammonNN import TDGammonNNQFunction
-from Agents.rl.template.inference import myAgent as InferenceAgent
+from Agents.rl.tdgammon.inference import myAgent as InferenceAgent
 from ExtendedFormGame.template import Agent
 from BackgammonGame.backgammon_model import BLACK_ID, WHITE_ID, BackgammonRules
 from ExtendedFormGame.Game import Game
@@ -234,8 +233,7 @@ def eval(agent_path:list[str], agent_names:list[str],
     random.seed(seed)
 
     # Initialise matches dictionary.
-    matches:dict = initialise_results(agent_path, agent_names,
-                                      model_path, seed)
+    matches:dict = initialise_results(agent_path, agent_names, seed)
 
     # Create agents.
     time_print("Creating agents...")
