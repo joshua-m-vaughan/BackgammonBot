@@ -72,7 +72,13 @@ TBC.
 
 ## Approach
 
-TBC.
+The approach used in the game is the TD-Gammon 0.0 agent framework outlined by Gerald Tesauro in his 1995 paper *Temporal Differenec Learning and TD-Gammon*. From Tesauro's implementation, after training the agent over 500,000 self-play games, the agent was at intermediate-level, and an impressive performance level when released.
+
+Some notable features of the approach are the following:
+
+- **Neural Network:** The neural network that is learned during self-play learns the value of a position for particular agents. Since the reward structure is zero, unless the agent wins, where it is one, the output layer indicates the expected probability that an agent wins in a particualr board position. The neural network consists of 198 input units which solely represent the board position, and no specific features (e.g. prime exists or not), a fully connected hidden layer of 40 units using a Sigmoid activation function, and a fully connected output layer of 4 units representing a win state for each player, and a gammon win state for each player. An important note is that my rules implementation doesn't consider a win by gammon, therefore, the output layer only has two output nodes.
+- **1-ply evaluation:** Actions are selected based on the value of the outcome state after an action is played. For example, if the white player is considering their move, they play all possible valid actions, and evaluate their expected value in the future state where it is the black players turn to move.
+- **Training Parameters:** The parameters that are set for training are $\alpha = 0.01$, $\gamma = 1.0$ and $\lamda = 0.7$.
 
 ## Experiment
 
