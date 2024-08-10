@@ -56,7 +56,9 @@ class myAgent(Agent):
         Returns:
             Action: Selected action instance.
         """
-
+        # Turn on eval mode.
+        self.qfunction.nn.eval()
+        
         # Select the highest estimated outcome state value.
         max_value:float = float("-inf")
         max_actions:list[tuple] = []
@@ -73,6 +75,7 @@ class myAgent(Agent):
         action:tuple = random.choice(max_actions)
 
         # Update Q-Function.
+        self.qfunction.nn.train()
         next_game_state:BackgammonState = self.mdp.get_next_state(game_state, action, self.id)
         reward:float = self.mdp.get_reward(game_state, next_game_state, action, self.id)
         if reward == 1:
