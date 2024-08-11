@@ -19,7 +19,7 @@ The Backgammon board game is centred on removing all of the pieces off of the bo
 
 The board layout consists of 24 points, with 6 points belonging to the black player's home board, and 6 points belonging to the white player's home board. Additionally, the board has two home positions, or bar positions that each player is trying to reach. Let 1 be the point next to the player's home board, and 24 be the furthest point from the player's home board. The board is laid out as detailed in the image below [[3]](#references):
 
-![Backgammon Board Layout](res\bg_board_layout.gif)
+![Backgammon Board Layout](res/bg_board_layout.gif)
 
 In specifying an efficient representation of the backgammon board configuration throughout the game, I have implemented a modified representation proposed by Lishout, Chaslot, and Uiterwijk [[1]](#references). The configuration is represented as follows:
 
@@ -84,19 +84,43 @@ Some notable features of the approach are the following:
 
 ### Experiment Design
 
-TBC.
+In evaluating the performance of my TD-Gammon 0.0 model implementation, I wanted to see the increase in model performance after exposure to additional self-play instances. To implement the experiment, I trained agents from the same starting seed, $42$ (the answer to *"the Ultimate Question of Life, the Universe, and Everything"*[[5]](#references)), so that the initial game sequence is comparable across agents.
+
+For the evaluation of agents, each agent played 500 games using the same starting seed, $344$, so that the game sequence is comparable for evaluation. This ensures that each set of agents is playing the same games.
+
+As part of the experiment design, I also compared the training performance across hardware used in the HPC cluster environment provided in the ME344 class.
 
 ### Experiment Results
 
-TBC.
+#### Agent Performance
+
+##### Table 1: Agent win percentage in evaluation
+
+| win \%  | 500         | 1,000       | 2,000       | Me      |
+| ------- | ----------- | ----------- | ----------- | ------- |
+| 500     | 68 \ 32     | 63 \ 37     | 43.4 \ 56.6 | N/A     |
+| 1,000   | 63.6 \ 36.4 | 62.4 \ 37.6 | 41.4 \ 58.6 | N/A     |
+| 2,000   | 88.4 \ 11.6 | 88.8 \ 11.2 | 67.8 \ 32.2 | 0 \ 100 |
+
+#### Training Time
+
+##### Figure 1: Training duration on hardware
+
+![Training duration on hardware](res/training-duration.png)
+
+##### Figure 2: Training duration per episode
+
+![Training duration per epidoe](res/episode-duration.png)
 
 ### Analysis
 
-TBC.
+Based on the agent performance, we see that agents benefit from being the first mover in the game, despite Backgammon being a game that is non-deterministic due to the roll of the dice. This is intriguing, however, due to the low number of games that each model is trained over during self-play, I expect that this aspect would become less pronounced as it reaches the comparable 500,000 game training used in Tesauro's original paper [[1]](#references).
+
+With regards to the training time, despite the minimum CPU trained agent training on 500 games compared to the GPU agent of 100 games, the CPU training performance is significantly greater. This is counterintuitive, as models are expected to be more efficient when deployed to GPUs. My hypothesis is that the impact is actually driven by the more complex state generation involved in the Backgammon game simulator which is faster on CPU rather than GPU. Additionally, the increased performance of the GPU over model training and inference is not great enough to offset this difference in performance as the TD-Gammon model is small. Further investigation would be required to understand where the change in performance directly comes from.
 
 ## Conclusion
 
-TBC.
+In conclusion, the TD-Gammon was an influential approach in reinforcement learning when published by Tesauro in 1995. As a personal exercise, it was interesting to learn about the model in detail and using modern packages like `PyTorch` in implementation. To see the true potential of the TD-Gammon model, I will need to access some additional resources (e.g. build a cluster at home) to train it using self-play for the 500,000 games as in the original paper.
 
 ## References
 
@@ -107,3 +131,5 @@ TBC.
 [3]: Backgammon Galore! (2024) *Rules of Backgammon*. <https://www.bkgm.com/rules.html> (accessed on 21 July 2024)
 
 [4]: Tesauro, G. (1995). *Temporal difference learning and TD-Gammon*. Communications of the ACM, 38(3), 58-68.
+
+[5]: Hitchhikers Guide to the Galaxy Radio Series (1977)
