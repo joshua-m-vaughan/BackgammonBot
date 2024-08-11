@@ -10,9 +10,15 @@
             "request": "launch",
             "program": "${workspaceFolder}/backgammon_runner.py",
             "console": "integratedTerminal",
-            "args": ["--train", "--name", "tdg_debug", "--episodes",
-                    "2", "-a", "rl.tdgammon.TDGammon0_0,generic.human",
-                    "--agent_names", "tdg00_1,jv"]
+            "args": ["--eval",
+                    "--name", "tdg00_human_bm",
+                    "--episodes", "5",
+                    "-a", "rl.tdgammon.inference,generic.human",
+                    "--agent_names", "tdg00,jv",
+                    "-r", "results/eval/",
+                    "--models", "./Agents/rl/tdgammon/trained_models/presentation_models/20240810-1005_tdg00_sp_cpu2000.pt,None",
+                    "--set_seed", "344"
+                ]
         }
     ]
 }
