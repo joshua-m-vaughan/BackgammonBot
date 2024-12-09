@@ -54,22 +54,6 @@ Backgammon is both a game of luck, and strategy. Some basic backgammon strategie
 
 May the best player win!
 
-## Reinforcement Learning Model Specification
-
-### State-Space Model
-
-Backgammon is a two-person non-deterministic perfect information extensive form game that can be defined as a Stochastic game, as outlined below:
-
-- TBC.
-
-### Analysis of State Space
-
-TBC.
-
-### Analysis of Action Space
-
-TBC.
-
 ## Approach
 
 The approach used in the game is the TD-Gammon 0.0 agent framework outlined by Gerald Tesauro in his 1995 paper *Temporal Differenec Learning and TD-Gammon* [[4]](#references). From Tesauro's implementation, after training the agent over 500,000 self-play games, the agent was at intermediate-level, and an impressive performance level when released.
